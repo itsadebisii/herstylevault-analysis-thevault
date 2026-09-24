@@ -38,6 +38,17 @@ body{font-family:'Jost',sans-serif;background:var(--cream);color:var(--text-dark
 textarea{width:100%;border:1px solid rgba(201,160,154,0.3);padding:0.8rem;font-size:0.78rem;font-family:'Jost',sans-serif;color:var(--text-dark);outline:none;background:var(--cream);resize:vertical;min-height:80px;line-height:1.6;}
 .genbtn{width:100%;padding:1rem;background:var(--pkg);color:white;border:none;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;font-family:'Jost',sans-serif;margin-top:1.5rem;}
 .resetbtn{background:none;border:none;font-size:0.65rem;color:var(--text-light);cursor:pointer;letter-spacing:0.1em;text-decoration:underline;font-family:'Jost',sans-serif;margin-top:1rem;display:block;}
+.genbtn.stepped{display:none;}
+.stepnav{margin-bottom:1.5rem;}
+.stepprogress{display:flex;gap:0.3rem;margin-bottom:1.2rem;}
+.stepprogress .stepdot{height:3px;flex:1;background:rgba(201,160,154,0.25);border-radius:2px;}
+.stepprogress .stepdot.done{background:var(--pkg);}
+.stepprogress .stepdot.cur{background:var(--gold);}
+.stepnav-btns{display:flex;justify-content:space-between;align-items:center;gap:1rem;}
+.stepback{background:none;border:none;font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-light);cursor:pointer;font-family:'Jost',sans-serif;}
+.stepback:disabled{opacity:0.3;cursor:not-allowed;}
+.stepnext{padding:0.85rem 2rem;background:var(--pkg);color:white;border:none;font-size:0.7rem;letter-spacing:0.16em;text-transform:uppercase;cursor:pointer;font-family:'Jost',sans-serif;}
+.stepnext:disabled{opacity:0.4;cursor:not-allowed;}
 .results{display:none;margin-top:2rem;}.results.vis{display:block;}
 .rhead{background:var(--text-dark);padding:1.5rem 2rem;margin-bottom:1rem;}
 .rhead-label{font-size:0.55rem;letter-spacing:0.3em;text-transform:uppercase;color:rgba(242,217,208,0.4);margin-bottom:0.3rem;}
@@ -220,6 +231,7 @@ textarea{width:100%;border:1px solid rgba(201,160,154,0.3);padding:0.8rem;font-s
 
 <script>
 const CA={},BA={};
+let colorStepper,bodyStepper;
 const PKG_NAME='The Vault Edit';
 const PKG_TAG='Standard';
 const OUTFIT_COUNT=7;
@@ -380,8 +392,8 @@ function copyBodyGuide(){
   const text=`═══════════════════════════════════\nHERSTYLEVAULT — BODY ANALYSIS\n${name} · The Vault Edit (Standard)\n═══════════════════════════════════\n\n✦ STYLE ARCHETYPE: ${arch}\n\nBODY SHAPE: ${d.shape}\n${d.desc}\n${narrative}\n\nSTYLING GOAL: ${d.goal}\n\nCOMPLETE SILHOUETTE GUIDE:\n${d.sils.map(s=>`• ${s}`).join('\n')}\n\nFULL TOPS & NECKLINES:\n${d.tops.map(s=>`• ${s}`).join('\n')}\n\nFULL BOTTOMS & DRESSES:\n${d.bots.map(s=>`• ${s}`).join('\n')}\n\nACCESSORY STYLING:\n${d.acc.map(s=>`• ${s}`).join('\n')}\n\nFABRIC GUIDE:\nBest: ${d.fabGood}\nAvoid: ${d.fabAvoid}\n\nCOMPLETE AVOID LIST:\n${d.avd.map(s=>`• ${s}`).join('\n')}${notes?'\n\nNOTES:\n'+notes:''}\n\n— Adebisi · HerStyleVault ✦`;
   navigator.clipboard.writeText(text).then(()=>alert('Copied for Style Guide! ✦'));
 }
-function resetColor(){document.querySelectorAll('#sec-color .qopt').forEach(b=>b.classList.remove('sel'));document.getElementById('cnotes').value='';document.getElementById('color-res').classList.remove('vis');Object.keys(CA).forEach(k=>delete CA[k]);colorGenerated=false;updateExportState();}
-function resetBody(){document.querySelectorAll('#sec-body .qopt').forEach(b=>b.classList.remove('sel'));document.getElementById('bnotes').value='';document.getElementById('body-res').classList.remove('vis');Object.keys(BA).forEach(k=>delete BA[k]);bodyGenerated=false;updateExportState();}
+function resetColor(){document.querySelectorAll('#sec-color .qopt').forEach(b=>b.classList.remove('sel'));document.getElementById('cnotes').value='';document.getElementById('color-res').classList.remove('vis');Object.keys(CA).forEach(k=>delete CA[k]);colorGenerated=false;updateExportState();if(colorStepper)colorStepper.reset();}
+function resetBody(){document.querySelectorAll('#sec-body .qopt').forEach(b=>b.classList.remove('sel'));document.getElementById('bnotes').value='';document.getElementById('body-res').classList.remove('vis');Object.keys(BA).forEach(k=>delete BA[k]);bodyGenerated=false;updateExportState();if(bodyStepper)bodyStepper.reset();}
 
 /* ===== Outfit Builds ===== */
 function renderOutfitSlots(){
@@ -568,6 +580,56 @@ async function exportStyleGuidePDF(){
   }
 }
 
+function initStepper(section){
+  const sec=document.getElementById('sec-'+section);
+  const cards=[...sec.querySelectorAll('.qcard')];
+  const genBtn=sec.querySelector('.genbtn');
+  if(genBtn)genBtn.classList.add('stepped');
+  let idx=0;
+  const nav=document.createElement('div');
+  nav.className='stepnav';
+  sec.insertBefore(nav,cards[0]);
+  function keyFor(card){
+    const opt=card.querySelector('.qopt[onclick]');
+    if(!opt)return null;
+    const m=opt.getAttribute('onclick').match(/sel\(this,'([^']+)'/);
+    return m?m[1]:null;
+  }
+  function answered(card){
+    const key=keyFor(card);
+    if(!key)return true;
+    const store=section==='color'?CA:BA;
+    return !!store[key];
+  }
+  function renderNav(){
+    const total=cards.length;
+    let dots='';
+    for(let i=0;i<total;i++)dots+=`<span class="stepdot ${i<idx?'done':i===idx?'cur':''}"></span>`;
+    const isLast=idx===total-1;
+    nav.innerHTML=`<div class="stepprogress">${dots}</div>
+      <div class="stepnav-btns">
+        <button class="stepback" ${idx===0?'disabled':''}>← Back</button>
+        <button class="stepnext" ${!answered(cards[idx])?'disabled':''}>${isLast?'Generate Analysis ✦':'Next'}</button>
+      </div>`;
+    nav.querySelector('.stepback').onclick=()=>{if(idx>0){idx--;showCard();}};
+    nav.querySelector('.stepnext').onclick=()=>{
+      if(idx<total-1){idx++;showCard();}
+      else{section==='color'?genColor():genBody();}
+    };
+  }
+  function showCard(){
+    cards.forEach((c,i)=>c.style.display=i===idx?'':'none');
+    renderNav();
+    nav.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  sec.addEventListener('click',e=>{
+    if(e.target.classList.contains('qopt'))setTimeout(renderNav,0);
+  });
+  showCard();
+  return{reset(){idx=0;showCard();}};
+}
+colorStepper=initStepper('color');
+bodyStepper=initStepper('body');
 renderOutfitSlots();
 updateExportState();
 </script>
