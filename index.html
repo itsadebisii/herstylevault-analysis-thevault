@@ -218,13 +218,11 @@ textarea{width:100%;border:1px solid rgba(201,160,154,0.3);padding:0.8rem;font-s
   <div class="results" id="body-res">
     <div class="rhead"><p class="rhead-label">✦ Standard Body Analysis — The Vault Edit</p><h2 class="rhead-title">Silhouette <em>Blueprint</em></h2><p class="rhead-name" id="cn-body-disp"></p></div>
     <div class="archetype"><div><div class="arch-label">✦ Style Archetype</div><div class="arch-name" id="arch-body">—</div></div><div style="font-size:0.6rem;color:rgba(255,255,255,0.5);text-align:right;">🖤 The Vault Edit · Standard</div></div>
-    <div class="pkg-note">✦ <strong>The Vault Edit — Standard</strong> includes: Complete Silhouette Guide · Full Tops & Necklines · Full Bottoms & Dresses · Accessory Styling Guide · Full Fabric Guide · Complete Avoid List. Upgrade to The Full Reveal for occasion-specific styling and shopping keywords.</div>
+    <div class="pkg-note">✦ <strong>The Vault Edit — Standard</strong> includes: Complete Pieces That Suit Your Shape Guide · Accessory Styling Guide · Full Fabric Guide · Complete Avoid List. Upgrade to The Full Reveal for occasion-specific styling and shopping keywords.</div>
     <div class="rcard"><p class="rcard-label">✦ Why This Is You</p><h3 class="rcard-title">Built From Your Actual Answers</h3><p style="font-size:0.8rem;color:var(--text-mid);line-height:1.9;font-weight:300;" id="body-narrative"></p></div>
     <div class="rcard"><p class="rcard-label">Body Shape Identified</p><div class="shape-head"><img class="shape-icon" id="shape-icon" src=""/><div><h3 class="rcard-title" id="shape-r" style="margin-bottom:0.2rem;">—</h3><p style="font-size:0.75rem;color:var(--text-mid);line-height:1.8;font-weight:300;" id="shape-d"></p></div></div><div class="ref-box"><div class="ref-label">✦ Body Shape References</div><div class="ref-links" id="shape-refs"></div></div></div>
     <div class="rcard"><p class="rcard-label">Styling Goal</p><h3 class="rcard-title">What We Are Working Toward</h3><div class="tip-box"><p class="tip-text" id="goal-r"></p></div></div>
-    <div class="rcard"><p class="rcard-label">✅ Complete Silhouette Guide</p><h3 class="rcard-title">All Silhouettes That Work</h3><ul class="rlist" id="sil-r"></ul><div class="ref-box"><div class="ref-label">✦ Silhouette Visual References</div><div class="ref-links" id="sil-refs"></div></div></div><div class="rcard"><p class="rcard-label">✅ Pieces That Suit Your Shape</p><h3 class="rcard-title">Shop For These</h3><ul class="rlist" id="suit-r"></ul></div>
-    <div class="rcard"><p class="rcard-label">✅ Full Tops & Necklines Guide</p><h3 class="rcard-title">Best Tops & Necklines For This Shape</h3><ul class="rlist" id="tops-r"></ul><div class="ref-box"><div class="ref-label">✦ Tops & Neckline References</div><div class="ref-links" id="tops-refs"></div></div></div>
-    <div class="rcard"><p class="rcard-label">✅ Full Bottoms & Dresses Guide</p><h3 class="rcard-title">Best Bottoms & Dresses For This Shape</h3><ul class="rlist" id="bots-r"></ul></div>
+    <div class="rcard"><p class="rcard-label">✅ Pieces That Suit Your Shape</p><h3 class="rcard-title">Shop For These</h3><ul class="rlist" id="suit-r"></ul><div class="ref-box"><div class="ref-label">✦ Silhouette Visual References</div><div class="ref-links" id="sil-refs"></div></div></div>
     <div class="rcard"><p class="rcard-label">✅ Accessory Styling Guide</p><h3 class="rcard-title">How to Accessorize This Shape</h3><ul class="rlist" id="acc-r"></ul></div>
     <div class="rcard"><p class="rcard-label">✦ Complete Fabric Guide</p><h3 class="rcard-title">Best & Worst Fabrics For This Shape</h3><div class="gold-box"><p class="gold-label">Best Fabrics ✦</p><p class="gold-text" id="fab-good"></p></div><div class="avoid-box" style="margin-top:0.8rem;"><p class="avoid-label">Fabrics to Avoid</p><p class="avoid-text" id="fab-avoid"></p></div></div>
     <div class="rcard"><p class="rcard-label">Complete Avoid List</p><h3 class="rcard-title">Minimize These</h3><div class="avoid-box"><p class="avoid-label">Less Flattering For This Shape</p><ul class="rlist" id="avoid-r-body" style="margin-top:0.5rem;"></ul></div><div class="tip-box" style="margin-top:0.8rem;"><p class="tip-text">"These are guidelines not rules — everything we build together is designed specifically for your body so you always feel incredible." ✦</p></div></div>
@@ -316,13 +314,13 @@ const INTENSITY_COPY={
   inverted:{soft:{label:'🔺 Soft Inverted Triangle Shape',desc:"Your shoulders are a touch wider than your hips, but it's subtle, not a dramatic taper."},plain:{label:'🔺 Inverted Triangle Shape',desc:'Your shoulders are noticeably wider than your hips — the classic inverted triangle.'},defined:{label:'🔺 Defined Inverted Triangle Shape',desc:'Your shoulders are significantly wider than your hips, with minimal waist definition — a strong, athletic inverted triangle silhouette.'}}
 };
 const PIECES_SUIT={
-  pear:{tops:'Boat-neck tops, statement-sleeve blouses, structured blazers, off-shoulder tops',bottoms:'Straight-leg trousers, wide-leg pants, bootcut jeans, A-line skirts',dresses:'Fit-and-flare with detail up top, wrap dresses, A-line dresses',outerwear:'Structured blazers, statement-shoulder coats, jackets that end above or well below the hip'},
-  hourglass:{tops:'Wrap tops, fitted button-downs, V-neck fitted tees',bottoms:'High-waisted straight or skinny pants, pencil skirts, high-waisted jeans',dresses:'Wrap dresses, belted shirt dresses, structured bodycon',outerwear:'Belted trench coats, tailored blazers, fitted moto jackets'},
-  apple:{tops:'Empire-waist blouses, V-neck tunics, wrap tops',bottoms:'Straight-leg or bootcut trousers, dark-wash jeans',dresses:'Empire-waist dresses, A-line dresses, shift dresses with vertical seam detail',outerwear:'Open cardigans, long blazers worn open, duster coats'},
-  rectangle:{tops:'Peplum tops, wrap tops, ruffled or tiered blouses',bottoms:'Skinny jeans, pleated skirts, pants with a little volume',dresses:'Fit-and-flare, belted shirt dresses, wrap dresses',outerwear:'Belted coats, cropped jackets, structured blazers'},
-  inverted:{tops:'V-neck tops, plain scoop necks, wrap tops — nothing with shoulder detail',bottoms:'Wide-leg or flared trousers, A-line or pleated skirts, lighter/patterned bottoms',dresses:'A-line dresses, fit-and-flare with a plain bodice, dresses with volume at the hem',outerwear:'Simple unstructured jackets, longline cardigans'}
+  pear:{tops:'Boat-neck tops, statement-sleeve blouses, structured blazers, off-shoulder tops',necklines:'Boat necks, wide scoop necks, off-shoulder and cold-shoulder styles, statement collars',bottoms:'Straight-leg trousers, wide-leg pants, bootcut jeans, A-line skirts',dresses:'Fit-and-flare with detail up top, wrap dresses, A-line dresses',outerwear:'Structured blazers, statement-shoulder coats, jackets that end above or well below the hip'},
+  hourglass:{tops:'Wrap tops, fitted button-downs, V-neck fitted tees',necklines:'V-necks that follow the body naturally — most necklines work beautifully on this shape',bottoms:'High-waisted straight or skinny pants, pencil skirts, high-waisted jeans',dresses:'Wrap dresses, belted shirt dresses, structured bodycon',outerwear:'Belted trench coats, tailored blazers, fitted moto jackets'},
+  apple:{tops:'Empire-waist blouses, V-neck tunics, wrap tops',necklines:'V-necks, deep scoop necks, and off-shoulder styles',bottoms:'Straight-leg or bootcut trousers, dark-wash jeans',dresses:'Empire-waist dresses, A-line dresses, shift dresses with vertical seam detail',outerwear:'Open cardigans, long blazers worn open, duster coats'},
+  rectangle:{tops:'Peplum tops, wrap tops, ruffled or tiered blouses',necklines:'Off-shoulder and statement necklines — add width and femininity',bottoms:'Skinny jeans, pleated skirts, pants with a little volume',dresses:'Fit-and-flare, belted shirt dresses, wrap dresses',outerwear:'Belted coats, cropped jackets, structured blazers'},
+  inverted:{tops:'V-neck tops, plain scoop necks, wrap tops — nothing with shoulder detail',necklines:'V-necks, scoop necks, and simple halter necks — minimize shoulder width',bottoms:'Wide-leg or flared trousers, A-line or pleated skirts, lighter/patterned bottoms',dresses:'A-line dresses, fit-and-flare with a plain bodice, dresses with volume at the hem',outerwear:'Simple unstructured jackets, longline cardigans'}
 };
-function piecesSuitList(p){return [['Tops',p.tops],['Bottoms',p.bottoms],['Dresses',p.dresses],['Outerwear',p.outerwear]].map(([k,v])=>`${k}: ${v}`);}
+function piecesSuitList(p){return [['Tops',p.tops],['Necklines',p.necklines],['Bottoms',p.bottoms],['Dresses',p.dresses],['Outerwear',p.outerwear]].map(([k,v])=>`${k}: ${v}`);}
 
 
 function computeColorAxes(a){
@@ -433,15 +431,12 @@ function genBody(){
   document.getElementById('shape-d').textContent=ic.desc;
   document.getElementById('goal-r').textContent=d.goal;
   document.getElementById('arch-body').textContent=arch;
-  document.getElementById('sil-r').innerHTML=d.sils.map(s=>`<li class="ritem">${s}</li>`).join('');
   document.getElementById('suit-r').innerHTML=piecesSuitList(PIECES_SUIT[shape]).map(s=>`<li class="ritem">${s}</li>`).join('');
-  document.getElementById('tops-r').innerHTML=d.tops.map(s=>`<li class="ritem">${s}</li>`).join('');
-  document.getElementById('bots-r').innerHTML=d.bots.map(s=>`<li class="ritem">${s}</li>`).join('');
   document.getElementById('acc-r').innerHTML=d.acc.map(s=>`<li class="ritem">${s}</li>`).join('');
   document.getElementById('avoid-r-body').innerHTML=d.avd.map(s=>`<li class="ritem avoid">${s}</li>`).join('');
   document.getElementById('fab-good').textContent=d.fabGood;
   document.getElementById('fab-avoid').textContent=d.fabAvoid;
-  renderRefs('shape-refs',d.shapeRefs);renderRefs('sil-refs',d.silRefs);renderRefs('tops-refs',d.topsRefs);
+  renderRefs('shape-refs',d.shapeRefs);renderRefs('sil-refs',d.silRefs);
   document.getElementById('body-res').classList.add('vis');
   document.getElementById('body-res').scrollIntoView({behavior:'smooth'});
   bodyGenerated=true;updateExportState();
@@ -464,7 +459,7 @@ function copyBodyHub(){
   const name=document.getElementById('cn-body').value||'Client';
   const shape=BA.shape;if(!shape)return;
   const d=bodyData[shape];const ic=INTENSITY_COPY[shape][BA.intensity||'plain'];const{key:seasonKey}=getSeason(CA);const family=SEASON_FAMILY[seasonKey];const arch=archetypesBySeasonFamily[family]?.[shape]||'That Girl';
-  const text=`BODY ANALYSIS — ${name}\n\nStyle Archetype: ${arch}\nBody Shape: ${ic.label}\nStyling Goal: ${d.goal}\nBest Silhouette: ${d.sils[0]}\nBest Top: ${d.tops[0]}\n\n✦ Full analysis in your Style Guide`;
+  const text=`BODY ANALYSIS — ${name}\n\nStyle Archetype: ${arch}\nBody Shape: ${ic.label}\nStyling Goal: ${d.goal}\nTops: ${PIECES_SUIT[shape].tops}\nBottoms: ${PIECES_SUIT[shape].bottoms}\n\n✦ Full analysis in your Style Guide`;
   navigator.clipboard.writeText(text).then(()=>alert('Copied for Style Hub! ✦'));
 }
 function copyBodyGuide(){
@@ -473,7 +468,7 @@ function copyBodyGuide(){
   const d=bodyData[shape];const ic=INTENSITY_COPY[shape][BA.intensity||'plain'];const{key:seasonKey}=getSeason(CA);const family=SEASON_FAMILY[seasonKey];const arch=archetypesBySeasonFamily[family]?.[shape]||'That Girl';
   const narrative=buildBodyNarrative(BA,d);
   const notes=document.getElementById('bnotes').value;
-  const text=`═══════════════════════════════════\nHERSTYLEVAULT — BODY ANALYSIS\n${name} · The Vault Edit (Standard)\n═══════════════════════════════════\n\n✦ STYLE ARCHETYPE: ${arch}\n\nBODY SHAPE: ${ic.label}\n${ic.desc}\n${narrative}\n\nSTYLING GOAL: ${d.goal}\n\nPIECES THAT SUIT YOUR SHAPE:\n${piecesSuitList(PIECES_SUIT[shape]).map(s=>`• ${s}`).join('\n')}\n\nCOMPLETE SILHOUETTE GUIDE:\n${d.sils.map(s=>`• ${s}`).join('\n')}\n\nFULL TOPS & NECKLINES:\n${d.tops.map(s=>`• ${s}`).join('\n')}\n\nFULL BOTTOMS & DRESSES:\n${d.bots.map(s=>`• ${s}`).join('\n')}\n\nACCESSORY STYLING:\n${d.acc.map(s=>`• ${s}`).join('\n')}\n\nFABRIC GUIDE:\nBest: ${d.fabGood}\nAvoid: ${d.fabAvoid}\n\nCOMPLETE AVOID LIST:\n${d.avd.map(s=>`• ${s}`).join('\n')}${notes?'\n\nNOTES:\n'+notes:''}\n\n— Adebisi · HerStyleVault ✦`;
+  const text=`═══════════════════════════════════\nHERSTYLEVAULT — BODY ANALYSIS\n${name} · The Vault Edit (Standard)\n═══════════════════════════════════\n\n✦ STYLE ARCHETYPE: ${arch}\n\nBODY SHAPE: ${ic.label}\n${ic.desc}\n${narrative}\n\nSTYLING GOAL: ${d.goal}\n\nPIECES THAT SUIT YOUR SHAPE:\n${piecesSuitList(PIECES_SUIT[shape]).map(s=>`• ${s}`).join('\n')}\n\nACCESSORY STYLING:\n${d.acc.map(s=>`• ${s}`).join('\n')}\n\nFABRIC GUIDE:\nBest: ${d.fabGood}\nAvoid: ${d.fabAvoid}\n\nCOMPLETE AVOID LIST:\n${d.avd.map(s=>`• ${s}`).join('\n')}${notes?'\n\nNOTES:\n'+notes:''}\n\n— Adebisi · HerStyleVault ✦`;
   navigator.clipboard.writeText(text).then(()=>alert('Copied for Style Guide! ✦'));
 }
 function resetColor(){document.querySelectorAll('#sec-color .qopt').forEach(b=>b.classList.remove('sel'));document.getElementById('cnotes').value='';document.getElementById('color-res').classList.remove('vis');Object.keys(CA).forEach(k=>delete CA[k]);colorGenerated=false;updateExportState();if(colorStepper)colorStepper.reset();}
@@ -580,22 +575,9 @@ function buildPdfPages(){
     <p class="pdf-section-label">Pieces That Suit Your Shape</p>${pdfList(piecesSuitList(PIECES_SUIT[shape]))}
     ${pdfFoot(PKG_NAME+' — Body Analysis')}`));
 
-  const topsArr=bd.tops||bd.necks||[];
-  const topsLabel=bd.tops?'Tops & Necklines':'Best Necklines';
-  if(!bd.acc){
-    pages.push(pdfPage('',`<h1 class="pdf-h1">Silhouette <em>Guide</em></h1>
-      <p class="pdf-section-label" style="margin-top:0;">Best Silhouettes</p>${pdfList(bd.sils)}
-      <p class="pdf-section-label">${pdfEsc(topsLabel)}</p>${pdfList(topsArr)}
-      <p class="pdf-section-label">Best Bottoms</p>${pdfList(bd.bots)}
-      ${pdfFoot(PKG_NAME+' — Silhouette Guide')}`));
-  }else{
-    pages.push(pdfPage('',`<h1 class="pdf-h1">Silhouette <em>Guide</em></h1>
-      <p class="pdf-section-label" style="margin-top:0;">Complete Silhouette Guide</p>${pdfList(bd.sils)}
-      <p class="pdf-section-label">${pdfEsc(topsLabel)}</p>${pdfList(topsArr)}
-      ${pdfFoot(PKG_NAME+' — Silhouette Guide')}`));
-    pages.push(pdfPage('',`<h1 class="pdf-h1">Bottoms & <em>Accessories</em></h1>
-      <p class="pdf-section-label" style="margin-top:0;">Bottoms & Dresses</p>${pdfList(bd.bots)}
-      <p class="pdf-section-label">Accessory Styling Guide</p>${pdfList(bd.acc)}
+  if(bd.acc){
+    pages.push(pdfPage('',`<h1 class="pdf-h1">Accessory <em>Styling</em></h1>
+      <p class="pdf-section-label" style="margin-top:0;">Accessory Styling Guide</p>${pdfList(bd.acc)}
       ${pdfFoot(PKG_NAME+' — Styling Guide')}`));
   }
 
