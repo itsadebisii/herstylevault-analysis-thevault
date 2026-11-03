@@ -94,10 +94,13 @@ textarea{width:100%;border:1px solid rgba(201,160,154,0.3);padding:0.8rem;font-s
 .copy-guide:hover{background:var(--gold);}
 
 /* Outfit Builds tab */
-.export-box{background:var(--blush);padding:1.4rem 1.5rem;margin-bottom:1.8rem;text-align:center;}
-.export-btn{padding:1rem 2.2rem;background:var(--deep-rose);color:#fff;border:none;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;font-family:'Inter',sans-serif;transition:opacity 0.2s;}
-.export-btn:disabled{background:#cbb2ae;cursor:not-allowed;}
-.export-note{font-size:0.66rem;color:var(--text-mid);margin-top:0.7rem;letter-spacing:0.02em;line-height:1.6;}
+.export-box{background:var(--pkg);border-radius:20px;padding:2.2rem 2rem;margin-bottom:1.8rem;display:flex;flex-direction:column;align-items:center;gap:0.6rem;text-align:center;}
+.export-tag{font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);}
+.export-title{margin:0;font-family:'Playfair Display',serif;font-weight:500;font-size:1.4rem;color:#fff9f6;}
+.export-title em{color:var(--gold);font-style:italic;}
+.export-btn{padding:0.85rem 1.7rem;border-radius:999px;background:var(--gold);color:#1a1010;border:none;font-size:0.68rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;cursor:pointer;font-family:'Inter',sans-serif;transition:opacity 0.2s;margin-top:0.4rem;}
+.export-btn:disabled{background:rgba(228,210,165,0.4);cursor:not-allowed;}
+.export-note{font-size:0.72rem;color:rgba(255,249,246,0.75);margin-top:0;letter-spacing:0.02em;line-height:1.6;max-width:46ch;}
 .outfit-slot{background:white;border:1px solid rgba(201,160,154,0.2);padding:1.1rem 1.3rem;margin-bottom:1rem;}
 .outfit-caption{width:100%;border:1px solid rgba(201,160,154,0.3);padding:0.5rem 0.7rem;font-size:0.78rem;font-family:'Inter',sans-serif;color:var(--text-dark);margin-bottom:0.7rem;outline:none;background:var(--cream);}
 .outfit-upload-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;}
@@ -240,8 +243,10 @@ textarea{width:100%;border:1px solid rgba(201,160,154,0.3);padding:0.8rem;font-s
   <h2 class="sec-title">Outfit <em>Builds</em></h2>
   <p class="sec-sub">Upload a photo of each finished outfit build as you style them together this session, with a short caption. These are included automatically in the exported Style Guide PDF — fill in as many or as few as you have right now.</p>
   <div class="export-box">
-    <button class="export-btn" id="exportPdfBtn" onclick="exportStyleGuidePDF()" disabled>📄 Export Style Guide PDF</button>
+    <span class="export-tag" id="exportPdfTag">Step 2 of 2 · Almost there ✦</span>
+    <h2 class="export-title">Her full <em>Color + Style</em> story</h2>
     <p class="export-note" id="exportPdfNote">Generate both Color and Body analysis first.</p>
+    <button class="export-btn" id="exportPdfBtn" onclick="exportStyleGuidePDF()" disabled>⤓ Download Full Report (PDF)</button>
   </div>
   <div id="outfit-slots"></div>
 </div>
@@ -510,14 +515,20 @@ function handleOutfitUpload(evt,i){
 }
 function updateOutfitCaption(i,val){outfits[i]=outfits[i]||{};outfits[i].caption=val;}
 function updateExportState(){
-  const btn=document.getElementById('exportPdfBtn'),note=document.getElementById('exportPdfNote');
+  const btn=document.getElementById('exportPdfBtn'),note=document.getElementById('exportPdfNote'),tag=document.getElementById('exportPdfTag');
   if(!btn)return;
   if(colorGenerated&&bodyGenerated){
     btn.disabled=false;
+    if(tag)tag.textContent='Step 2 of 2 · Complete ✦';
+    const{key:seasonKey}=getSeason(CA);
+    const seasonLabel=colorData[seasonKey].label;
+    const shape=BA.shape;
+    const shapeLabel=(INTENSITY_COPY[shape]&&INTENSITY_COPY[shape][BA.intensity||'plain']?.label)||bodyData[shape].shape;
     const n=outfits.filter(o=>o&&o.img).length;
-    note.textContent=`Ready to export. ${n} of ${OUTFIT_COUNT} outfit build photo(s) added so far — photos are optional.`;
+    note.textContent=`${seasonLabel}, ${shapeLabel} — one report, one download. ${n} of ${OUTFIT_COUNT} outfit build photo(s) added so far — photos are optional.`;
   }else{
     btn.disabled=true;
+    if(tag)tag.textContent='Step 2 of 2 · Almost there ✦';
     note.textContent='Generate both Color and Body analysis first.';
   }
 }
