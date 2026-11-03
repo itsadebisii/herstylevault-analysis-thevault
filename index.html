@@ -25,6 +25,12 @@ body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--text-dar
 .client-bar{background:var(--blush);padding:1rem 1.5rem;margin-bottom:2rem;display:flex;align-items:center;gap:1rem;}
 .client-bar label{font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-mid);white-space:nowrap;}
 .client-bar input{flex:1;border:none;background:white;padding:0.5rem 0.8rem;font-size:0.82rem;font-family:'Inter',sans-serif;color:var(--text-dark);outline:none;}
+.entrance-card{background:var(--pkg);border-radius:20px;padding:2.2rem 2rem;margin-bottom:2rem;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;}
+.entrance-tag{font-size:0.6rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);}
+.entrance-title{margin:0;font-family:'Playfair Display',serif;font-weight:500;font-size:1.4rem;color:#fff9f6;}
+.entrance-title em{color:var(--gold);font-style:italic;}
+.entrance-input{margin-top:6px;width:100%;max-width:320px;border:none;border-radius:999px;padding:0.8rem 1.3rem;font-size:0.88rem;font-family:'Inter',sans-serif;text-align:center;color:var(--text-dark);outline:none;}
+.client-bar.hidden-mirror{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;}
 .sec-title{font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--text-dark);margin-bottom:0.3rem;}
 .sec-title em{font-style:italic;color:var(--pkg);}
 .sec-sub{font-size:0.75rem;color:var(--text-light);margin-bottom:1.5rem;font-weight:300;line-height:1.7;}
@@ -163,16 +169,15 @@ textarea{width:100%;border:1px solid rgba(201,160,154,0.3);padding:0.8rem;font-s
   <div class="pkg-banner-title">The Vault Edit · $175 · 4 Sessions · 7 Outfit Builds</div>
   <div class="pkg-banner-detail">Standard Color & Body Analysis</div>
 </div>
-<div class="tabs">
-  <button class="tab active" onclick="switchTab('color')">🎨 Color Analysis</button>
-  <button class="tab" onclick="switchTab('body')">👗 Body Analysis</button>
-  <button class="tab" onclick="switchTab('outfits')">📸 Outfit Builds</button>
-</div>
 <div class="main">
 
 <!-- COLOR -->
 <div id="sec-color" class="sec active">
-  <div class="client-bar"><label>Client Name</label><input type="text" id="cn-color" placeholder="Type client name..."/></div>
+  <div class="entrance-card">
+    <span class="entrance-tag">Before we begin ✦</span>
+    <h2 class="entrance-title">Who are we styling <em>today</em>?</h2>
+    <input type="text" id="cn-color" class="entrance-input" placeholder="Type client name..."/>
+  </div>
   <h2 class="sec-title">Color <em>Analysis</em></h2>
   <p class="sec-sub">Standard analysis for The Vault Edit — full palette, accent colors, accessory color guide, pattern guidance and metal tone. Ask naturally in conversation.</p>
   <div class="qcard"><p class="qlabel"><span class="qtag ask">Ask Client</span></p><p class="qtext">"Does gold or silver jewelry look better on you?"</p><div class="qopts"><button class="qopt" onclick="sel(this,'jewelry','gold')">Gold</button><button class="qopt" onclick="sel(this,'jewelry','silver')">Silver</button><button class="qopt" onclick="sel(this,'jewelry','both')">Both equally</button><button class="qopt" onclick="sel(this,'jewelry','unsure')">Not sure</button></div></div>
@@ -202,11 +207,19 @@ textarea{width:100%;border:1px solid rgba(201,160,154,0.3);padding:0.8rem;font-s
     <div class="rcard"><p class="rcard-label">Colors to Avoid</p><h3 class="rcard-title">Skip List</h3><div class="avoid-box"><p class="avoid-label">Minimize These</p><p class="avoid-text" id="avoid-r"></p></div></div>
     <div class="copy-btns"><button class="copy-btn copy-hub" onclick="copyColorHub()">Copy for Style Hub ✦</button><button class="copy-btn copy-guide" onclick="copyColorGuide()">Copy for Style Guide ✦</button></div>
   </div>
+
+  <div id="handoffScreen" style="display:none; background:var(--pkg); border-radius:20px; padding:2.4rem 2rem; margin-top:2rem; flex-direction:column; align-items:center; gap:10px; text-align:center;">
+    <span style="font-size:0.6rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--gold);">Step 1 of 2 · Color, decoded ✦</span>
+    <h2 style="margin:0; font-family:'Playfair Display',serif; font-weight:500; font-size:1.4rem; color:#fff9f6;">Now let's talk <em style="color:var(--gold); font-style:italic;">shape</em></h2>
+    <p style="margin:0; font-size:0.8rem; color:rgba(255,249,246,.75); max-width:40ch;">Her coloring is locked in. A few quick questions — some she answers, some you observe — and her shape story is next.</p>
+    <button onclick="revealBodySection()" style="margin-top:8px; padding:0.85rem 1.6rem; border:none; border-radius:999px; background:var(--gold); color:#1a1010; font-size:0.72rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; font-family:'Inter',sans-serif;">Continue to Style Analysis →</button>
+  </div>
 </div>
 
+<div id="bodyGate" style="display:none;">
 <!-- BODY -->
-<div id="sec-body" class="sec">
-  <div class="client-bar"><label>Client Name</label><input type="text" id="cn-body" placeholder="Type client name..."/></div>
+<div id="sec-body" class="sec active">
+  <div class="client-bar hidden-mirror"><label>Client Name</label><input type="text" id="cn-body" placeholder="Type client name..."/></div>
   <h2 class="sec-title">Body & Silhouette <em>Analysis</em></h2>
   <p class="sec-sub">Standard analysis for The Vault Edit — complete silhouette guide, full tops and necklines, full bottoms and dresses, accessory styling guide and complete fabric guide.</p>
   <div class="qcard"><p class="qlabel"><span class="qtag ask">Ask Client</span></p><p class="qtext">"Tops or bottoms fit better?"</p><div class="qopts"><button class="qopt" onclick="sel(this,'fit','tops')">Tops fit better</button><button class="qopt" onclick="sel(this,'fit','bottoms')">Bottoms fit better</button><button class="qopt" onclick="sel(this,'fit','both')">Both fit well</button><button class="qopt" onclick="sel(this,'fit','neither')">Neither fits great</button></div></div>
@@ -239,7 +252,7 @@ textarea{width:100%;border:1px solid rgba(201,160,154,0.3);padding:0.8rem;font-s
 </div>
 
 <!-- OUTFIT BUILDS -->
-<div id="sec-outfits" class="sec">
+<div id="sec-outfits" class="sec active">
   <h2 class="sec-title">Outfit <em>Builds</em></h2>
   <p class="sec-sub">Upload a photo of each finished outfit build as you style them together this session, with a short caption. These are included automatically in the exported Style Guide PDF — fill in as many or as few as you have right now.</p>
   <div class="export-box">
@@ -249,6 +262,7 @@ textarea{width:100%;border:1px solid rgba(201,160,154,0.3);padding:0.8rem;font-s
     <button class="export-btn" id="exportPdfBtn" onclick="exportStyleGuidePDF()" disabled>⤓ Download Full Report (PDF)</button>
   </div>
   <div id="outfit-slots"></div>
+</div>
 </div>
 </div>
 
@@ -429,6 +443,11 @@ function genColor(){
   document.getElementById('color-res').classList.add('vis');
   document.getElementById('color-res').scrollIntoView({behavior:'smooth'});
   colorGenerated=true;updateExportState();
+  const ho=document.getElementById('handoffScreen');if(ho)ho.style.display='flex';
+}
+function revealBodySection(){
+  const gate=document.getElementById('bodyGate');
+  if(gate){gate.style.display='block';gate.scrollIntoView({behavior:'smooth',block:'start'});}
 }
 function genBody(){
   const name=document.getElementById('cn-body').value||'Client';
@@ -483,7 +502,7 @@ function copyBodyGuide(){
   const text=`═══════════════════════════════════\nHERSTYLEVAULT — BODY ANALYSIS\n${name} · The Vault Edit (Standard)\n═══════════════════════════════════\n\n✦ STYLE ARCHETYPE: ${arch}\n\nBODY SHAPE: ${ic.label}\n${ic.desc}\n${narrative}\n\nSTYLING GOAL: ${d.goal}\n\nPIECES THAT SUIT YOUR SHAPE:\n${piecesSuitList(PIECES_SUIT[shape]).map(s=>`• ${s}`).join('\n')}\n\nACCESSORY STYLING:\n${d.acc.map(s=>`• ${s}`).join('\n')}\n\nFABRIC GUIDE:\nBest: ${d.fabGood}\nAvoid: ${d.fabAvoid}\n\nCOMPLETE AVOID LIST:\n${d.avd.map(s=>`• ${s}`).join('\n')}${notes?'\n\nNOTES:\n'+notes:''}\n\n— Adebisi · HerStyleVault ✦`;
   navigator.clipboard.writeText(text).then(()=>alert('Copied for Style Guide! ✦'));
 }
-function resetColor(){document.querySelectorAll('#sec-color .qopt').forEach(b=>b.classList.remove('sel'));document.getElementById('cnotes').value='';document.getElementById('color-res').classList.remove('vis');Object.keys(CA).forEach(k=>delete CA[k]);colorGenerated=false;updateExportState();if(colorStepper)colorStepper.reset();}
+function resetColor(){document.querySelectorAll('#sec-color .qopt').forEach(b=>b.classList.remove('sel'));document.getElementById('cnotes').value='';document.getElementById('color-res').classList.remove('vis');Object.keys(CA).forEach(k=>delete CA[k]);colorGenerated=false;updateExportState();if(colorStepper)colorStepper.reset();const ho=document.getElementById('handoffScreen');if(ho)ho.style.display='none';const gate=document.getElementById('bodyGate');if(gate)gate.style.display='none';}
 function resetBody(){document.querySelectorAll('#sec-body .qopt').forEach(b=>b.classList.remove('sel'));document.getElementById('bnotes').value='';document.getElementById('body-res').classList.remove('vis');Object.keys(BA).forEach(k=>delete BA[k]);bodyGenerated=false;updateExportState();if(bodyStepper)bodyStepper.reset();}
 
 /* ===== Outfit Builds ===== */
@@ -670,6 +689,18 @@ function initStepper(section){
   const cards=[...sec.querySelectorAll('.qcard')];
   const genBtn=sec.querySelector('.genbtn');
   if(genBtn)genBtn.classList.add('stepped');
+  const groups=[];
+  let buf=[];
+  cards.forEach(card=>{
+    const isObs=!!card.querySelector('.qtag.obs');
+    if(isObs){
+      if(buf.length){groups.push(buf);buf=[];}
+      groups.push([card]);
+    }else{
+      buf.push(card);
+    }
+  });
+  if(buf.length)groups.push(buf);
   let idx=0;
   const nav=document.createElement('div');
   nav.className='stepnav';
@@ -680,14 +711,15 @@ function initStepper(section){
     const m=opt.getAttribute('onclick').match(/sel\(this,'([^']+)'/);
     return m?m[1]:null;
   }
-  function answered(card){
-    const key=keyFor(card);
-    if(!key)return true;
+  function groupAnswered(group){
     const store=section==='color'?CA:BA;
-    return !!store[key];
+    return group.every(card=>{
+      const key=keyFor(card);
+      return !key||!!store[key];
+    });
   }
   function renderNav(){
-    const total=cards.length;
+    const total=groups.length;
     let dots='';
     for(let i=0;i<total;i++){
       dots+=`<span class="stepdot ${i<idx?'done':i===idx?'cur':''}">${String(i+1).padStart(2,'0')}</span>`;
@@ -697,29 +729,31 @@ function initStepper(section){
     nav.innerHTML=`<div class="stepprogress">${dots}</div>
       <div class="stepnav-btns">
         <button class="stepback" ${idx===0?'disabled':''}>← Back</button>
-        <button class="stepnext" ${!answered(cards[idx])?'disabled':''}>${isLast?'Generate Analysis ✦':'Next'}</button>
+        <button class="stepnext" ${!groupAnswered(groups[idx])?'disabled':''}>${isLast?'Generate Analysis ✦':'Next'}</button>
       </div>`;
-    nav.querySelector('.stepback').onclick=()=>{if(idx>0){idx--;showCard();}};
+    nav.querySelector('.stepback').onclick=()=>{if(idx>0){idx--;showGroup();}};
     nav.querySelector('.stepnext').onclick=()=>{
-      if(idx<total-1){idx++;showCard();}
+      if(idx<total-1){idx++;showGroup();}
       else{section==='color'?genColor():genBody();}
     };
   }
-  function showCard(){
-    cards.forEach((c,i)=>c.style.display=i===idx?'':'none');
+  function showGroup(){
+    cards.forEach(c=>c.style.display='none');
+    groups[idx].forEach(c=>c.style.display='');
     renderNav();
     nav.scrollIntoView({behavior:'smooth',block:'start'});
   }
   sec.addEventListener('click',e=>{
     if(e.target.classList.contains('qopt'))setTimeout(renderNav,0);
   });
-  showCard();
-  return{reset(){idx=0;showCard();}};
+  showGroup();
+  return{reset(){idx=0;showGroup();}};
 }
 colorStepper=initStepper('color');
 bodyStepper=initStepper('body');
 renderOutfitSlots();
 updateExportState();
+document.getElementById('cn-color').addEventListener('input',function(){document.getElementById('cn-body').value=this.value;});
 </script>
 </body>
 </html>
