@@ -704,6 +704,7 @@ function croqPng(shape,BAx,w,h,stroke,extra){
     img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg.replace('<svg ','<svg width="1000" height="2840" '));});
 }
 
+function clipCaption(t){t=String(t||'').trim();return t.length>220?t.slice(0,217).trimEnd()+'…':t;}
 function pdfFoot(label){return `<div class="pdf-foot"><span>HerStyleVault</span><span>${pdfEsc(label)}</span></div>`;}
 function pdfSwatches(arr,seasonKey){return `<div class="pdf-swatches">${arr.map(c=>`<div class="pdf-sw"><img class="pdf-sw-box" src="${(SWATCH_SHAPES[seasonKey]&&SWATCH_SHAPES[seasonKey][c.n])||''}"/><div class="pdf-sw-label">${pdfEsc(c.n)}</div><div class="pdf-sw-hex">${pdfEsc(String(c.h||'').toUpperCase())}</div></div>`).join('')}</div>`;}
 function pdfList(arr){return `<ul class="pdf-list">${arr.map(i=>`<li>${pdfEsc(i)}</li>`).join('')}</ul>`;}
@@ -784,7 +785,7 @@ function buildPdfPages(){
       <div style="display:flex;align-items:center;justify-content:center;height:760px;">
         <img src="${o.img}" class="pdf-outfit-photo"/>
       </div>
-      <div class="pdf-outfit-caption">${pdfEsc(o.caption||('Outfit '+(i+1)))}</div>
+      <div class="pdf-outfit-caption">${pdfEsc(clipCaption(o.caption||('Outfit '+(i+1))))}</div>
       ${pdfFoot(PKG_NAME+' — Outfit Builds')}`));
   });
 
@@ -1425,5 +1426,118 @@ function pdfLinksPage(){
     ${pdfFoot(PKG_NAME+' — Inspiration Links')}`);
 }
 </script>
+<script>
+/* ===== Stylist Override + Answer Log diagnostics (package tools) =====
+   Overrides sit on top of the quiz result: every downstream page reads getSeason / computeBodyShape /
+   computeIntensity, so wrapping those three keeps the screen, PDF and PowerPoint in step.
+   The diagnostics keep the weights below in sync with computeColorAxes. */
+(function(){
+  const OV={season:'',shape:'',intensity:''};window.STYLIST_OV=OV;
+  const o_getSeason=getSeason,o_shape=computeBodyShape,o_int=computeIntensity,o_bcn=buildColorNarrative,o_bbn=buildBodyNarrative,o_bal=buildAnswerLogPages;
+  const lbl=k=>String((colorData[k]&&(colorData[k].label||colorData[k].undertone))||k).replace(/\s*✦/g,'');
+  const SHAPE_NAMES={hourglass:'Hourglass',pear:'Pear',apple:'Apple',rectangle:'Rectangle',inverted:'Inverted Triangle'};
+  const INT_NAMES={defined:'Defined',soft:'Soft',plain:'Plain'};
+  getSeason=function(a){const r=o_getSeason(a);return(OV.season&&colorData[OV.season])?{key:OV.season,axes:r.axes}:r;};
+  computeBodyShape=function(a){return OV.shape&&bodyData[OV.shape]?OV.shape:o_shape(a);};
+  const IDATA=(typeof intensityData!=='undefined')?intensityData:INTENSITY_COPY;
+  computeIntensity=function(shape,a){const want=OV.intensity;return(want&&IDATA[shape]&&IDATA[shape][want])?want:o_int(shape,a);};
+  const computedSeason=a=>o_getSeason(a).key;
+  buildColorNarrative=function(a,axes,season){
+    if(OV.season&&OV.season!==computedSeason(a)){
+      return 'Working through your coloring together in session, the clearest match is '+lbl(OV.season)+'. '+season.desc;
+    }
+    return o_bcn(a,axes,season);
+  };
+  buildBodyNarrative=function(a,shapeData){
+    if(OV.shape&&OV.shape!==o_shape(a)){
+      const nm=SHAPE_NAMES[OV.shape]+' shape',art=/^[AEIOU]/i.test(nm)?'an':'a';
+      const conf={shoulders:'your shoulders and collarbone',waist:'your waist',legs:'your legs',bust:'your bust',overall:'your overall silhouette'}[a.conf]||'your best features';
+      let out='Looking at your proportions together in session, we landed on '+art+' '+nm+', and that is what the recommendations below are built around. You feel most confident in '+conf+', so every recommendation below is built to keep highlighting that.';
+      const tip=proportionTipFor(OV.shape,a.height,a.proportion);
+      if(tip)out+=" One more thing that's specific to you: "+tip.charAt(0).toLowerCase()+tip.slice(1);
+      return out;
+    }
+    return o_bbn(a,shapeData);
+  };
+  /* ---- diagnostics ---- */
+  function scores(a){
+    let w=0,c=0;
+    if(a.jewelry==='gold')w+=3;if(a.jewelry==='silver')c+=3;if(a.jewelry==='both'){w++;c++;}
+    if(a.wash==='cool')w+=2;if(a.wash==='pale')w+=1;if(a.wash==='warm')c+=2;
+    if(a.comp==='warm')w+=2;if(a.comp==='cool')c+=2;
+    if(a.sun==='tan')w+=1;if(a.sun==='burn')c+=1;
+    if(a.veins==='green')w+=1;if(a.veins==='blue')c+=1;
+    let ch=0;if(a.chroma==='bright')ch+=2;if(a.chroma==='muted')ch-=2;if(a.contrast==='high')ch+=1;if(a.contrast==='low')ch-=1;
+    const depth={fair:0,light:0,medium:1,olive:1,tan:2,caramel:2,deep:3,rich:3}[a.depth];
+    return{net:w-c,warm:w,cool:c,chroma:ch,depth:depth===undefined?1:depth};
+  }
+  function diagnostics(){
+    const a=CA,sc=scores(a),axes=o_getSeason(a).axes;
+    // Every neighbouring result (one step on the undertone or clarity axis) and how many points it would take to get there.
+    const base=computedSeason(a);
+    const cand=[];
+    const uN=axes.undertone==='warm'?[['neutral',sc.net-2]]:axes.undertone==='cool'?[['neutral',-sc.net-2]]:[['warm',3-sc.net],['cool',3+sc.net]];
+    const cN=axes.chroma==='bright'?[['blended',sc.chroma]]:axes.chroma==='soft'?[['blended',-sc.chroma]]:[['bright',1],['soft',1]];
+    uN.forEach(([cls,mg])=>cand.push({k:SEASON_TABLE[cls][axes.chroma][axes.value],margin:mg,axis:'undertone'}));
+    cN.forEach(([cls,mg])=>cand.push({k:SEASON_TABLE[axes.undertone][cls][axes.value],margin:mg,axis:'clarity'}));
+    const diff=cand.filter(x=>x.k!==base).sort((x,y)=>x.margin-y.margin);
+    const best=diff[0]||null;
+    const margin=best?best.margin:null;
+    const runnerKey=best?best.k:null;
+    const conf=!best?'High':margin>=3?'High':margin===2?'Medium':'Low';
+    const showRunner=!!best&&margin<=2;
+    const uMargin=Math.min.apply(null,uN.map(x=>x[1])),cMargin=Math.min.apply(null,cN.map(x=>x[1]));
+    const conflicts=[];
+    const und=axes.undertone;
+    colorSignals(a).forEach(s=>{if(und==='neutral'){if(s.dir!=='neutral')conflicts.push('Color: '+s.text+' (points '+s.dir+')');}else if(s.dir!=='neutral'&&s.dir!==und)conflicts.push('Color: '+s.text+' (points '+s.dir+', result is '+und+')');});
+    const shapeNow=o_shape(BA);
+    const suggests={fit:{tops:['pear'],bottoms:['apple','inverted']},weight:{hips:['pear'],belly:['apple'],upper:['inverted']}};
+    [['fit','Tops fit better than bottoms','Bottoms fit better than tops'],['weight','Carries weight first in the hips','Carries weight in the belly']].forEach(()=>{});
+    const fitS=(suggests.fit[BA.fit]||null),wtS=(suggests.weight[BA.weight]||null);
+    const FIT={tops:'says tops fit better than bottoms',bottoms:'says bottoms fit better than tops'},WT={hips:'carries weight first in the hips',belly:'carries weight first in the belly',upper:'carries weight first in the upper body'};
+    if(fitS&&fitS.indexOf(shapeNow)<0)conflicts.push('Body: '+FIT[BA.fit]+' (usually '+fitS.join(' or ')+'), result is '+SHAPE_NAMES[shapeNow]);
+    if(wtS&&wtS.indexOf(shapeNow)<0)conflicts.push('Body: '+WT[BA.weight]+' (usually '+wtS.join(' or ')+'), result is '+SHAPE_NAMES[shapeNow]);
+    const k1=getSeason(a).key,k2=(showRunner&&k1===base)?runnerKey:null;
+    const first=k=>(colorData[k].signature&&colorData[k].signature[0]&&colorData[k].signature[0].n)||'a signature color';
+    const drape=k2?('Drape '+first(k1)+' ('+lbl(k1)+') against '+first(k2)+' ('+lbl(k2)+') at the jaw in daylight, keep the one that clears her skin and brightens her eyes, and use Stylist Override if '+lbl(k2)+' wins.')
+      :('Drape '+first(k1)+' at the jaw in daylight; if her skin looks clearer and her eyes brighter than in her usual shade, '+lbl(k1)+' is confirmed.');
+    return{base,runnerKey,showRunner,conf,margin,conflicts,drape,uMargin,cMargin};
+  }
+  function diagPage(){
+    const a=CA,d=diagnostics(),usedSeason=getSeason(a).key,usedShape=BA.shape||o_shape(BA),usedInt=BA.intensity||o_int(usedShape,BA);
+    const compShape=o_shape(BA),compInt=o_int(compShape,BA);
+    const ovLines=[];
+    if(OV.season&&OV.season!==d.base)ovLines.push('Season: quiz said '+lbl(d.base)+', stylist set '+lbl(OV.season));
+    if(OV.shape&&OV.shape!==compShape)ovLines.push('Body shape: quiz said '+SHAPE_NAMES[compShape]+', stylist set '+SHAPE_NAMES[OV.shape]);
+    if(OV.intensity&&OV.intensity!==compInt)ovLines.push('Intensity: quiz said '+(INT_NAMES[compInt]||compInt)+', stylist set '+INT_NAMES[OV.intensity]);
+    const name=(document.getElementById('cn-color').value||document.getElementById('cn-body').value||'Client').trim()||'Client';
+    return pdfPage('',`<p class="pdf-section-label" style="margin-top:0;">HerStyleVault · Stylist Diagnostics · ${pdfEsc(PKG_NAME)}</p>
+      <h1 class="pdf-h1">${pdfEsc(name)}</h1>
+      <p class="pdf-section-label">Result used in the client file</p><div class="pdf-box">Color type: ${pdfEsc(lbl(usedSeason))}<br>Body shape: ${pdfEsc(SHAPE_NAMES[usedShape]||usedShape)} · ${pdfEsc(INT_NAMES[usedInt]||usedInt)}</div>
+      <p class="pdf-section-label">Stylist override</p><div class="pdf-box">${ovLines.length?ovLines.map(pdfEsc).join('<br>'):'None. The quiz result was used as is.'}</div>
+      <p class="pdf-section-label">Confidence</p><div class="pdf-box"><b>${d.conf}</b> · ${d.margin===null?'moving undertone or clarity by one step still lands on the same color type.':'the nearest different season is '+d.margin+' point'+(d.margin===1?'':'s')+' away ('+pdfEsc(lbl(d.runnerKey))+').'}</div>
+      <p class="pdf-section-label">Runner-up season</p><div class="pdf-box">${d.showRunner?pdfEsc(lbl(d.runnerKey))+' · answers sit within 2 points of this season.':'None. No other season is within 2 points.'}</div>
+      <p class="pdf-section-label">Conflicting signals</p>${d.conflicts.length?pdfList(d.conflicts):'<div class="pdf-box">None. Her answers agree with the result.</div>'}
+      <p class="pdf-section-label">Live drape-test prompt</p><div class="pdf-box" style="font-style:italic;">${pdfEsc(d.drape)}</div>
+      ${pdfFoot(PKG_NAME+' — Stylist Diagnostics (not for client)')}`);
+  }
+  buildAnswerLogPages=function(){return [diagPage()].concat(o_bal());};
+  /* ---- stylist UI ---- */
+  function sel(id,label,opts){return '<label style="display:block;font-size:0.7rem;letter-spacing:0.06em;text-transform:uppercase;color:#8A8378;margin:0.6rem 0 0.25rem;">'+label+'</label><select id="'+id+'" style="width:100%;padding:0.5rem;border:1px solid #CDBBA8;background:#FDFCFA;font:inherit;">'+opts+'</select>';}
+  function build(){
+    const note=document.getElementById('exportPdfNote');if(!note||document.getElementById('ov-box'))return;
+    const seasons='<option value="">Auto (from quiz)</option>'+Object.keys(colorData).map(k=>'<option value="'+k+'">'+lbl(k)+'</option>').join('');
+    const shapes='<option value="">Auto (from quiz)</option>'+Object.keys(SHAPE_NAMES).map(k=>'<option value="'+k+'">'+SHAPE_NAMES[k]+'</option>').join('');
+    const ints='<option value="">Auto (from quiz)</option>'+Object.keys(INT_NAMES).map(k=>'<option value="'+k+'">'+INT_NAMES[k]+'</option>').join('');
+    note.insertAdjacentHTML('afterend','<details id="ov-box" style="margin:0.8rem 0;padding:0.8rem 1rem;border:1px solid #CDBBA8;background:#FDFCFA;text-align:left;"><summary style="cursor:pointer;font-size:0.8rem;letter-spacing:0.06em;">Stylist override (optional)</summary><p style="font-size:0.75rem;color:#8A8378;margin:0.6rem 0 0;">Changes every swatch, narrative and link in the client files, and is logged in the Answer Log.</p>'+sel('ov-season','Color season',seasons)+sel('ov-shape','Body shape',shapes)+sel('ov-int','Intensity',ints)+'<button type="button" id="ov-reset" style="margin-top:0.8rem;padding:0.5rem 0.9rem;border:1px solid #CDBBA8;background:transparent;cursor:pointer;font:inherit;">Reset overrides</button></details>');
+    const apply=()=>{OV.season=document.getElementById('ov-season').value;OV.shape=document.getElementById('ov-shape').value;OV.intensity=document.getElementById('ov-int').value;
+      if(colorGenerated)genColor();if(bodyGenerated)genBody();updateExportState();};
+    ['ov-season','ov-shape','ov-int'].forEach(id=>document.getElementById(id).addEventListener('change',apply));
+    document.getElementById('ov-reset').addEventListener('click',()=>{['ov-season','ov-shape','ov-int'].forEach(id=>document.getElementById(id).value='');apply();});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();
+})();
+</script>
+
 </body>
 </html>
