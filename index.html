@@ -195,7 +195,7 @@ textarea{width:100%;border:1px solid rgba(201,160,154,0.3);padding:0.8rem;font-s
     <input type="text" id="cn-color" class="entrance-input" placeholder="Type client name..."/>
   </div>
   <h2 class="sec-title">Color <em>Analysis</em></h2>
-  <p class="sec-sub">Standard analysis for The Vault Edit — full palette, accent colors, accessory color guide, pattern guidance and metal tone. Ask naturally in conversation.</p>
+  <p class="sec-sub">Standard analysis for The Vault Edit — 3 neutrals, 5 signature colors, accessory color guide, metal tone and colors to avoid. Ask naturally in conversation.</p>
   <div class="qcard"><p class="qlabel"><span class="qtag ask">Ask Client</span></p><p class="qtext">"Does gold or silver jewelry look better on you?"</p><div class="qopts"><button class="qopt" onclick="sel(this,'jewelry','gold')">Gold</button><button class="qopt" onclick="sel(this,'jewelry','silver')">Silver</button><button class="qopt" onclick="sel(this,'jewelry','both')">Both equally</button><button class="qopt" onclick="sel(this,'jewelry','unsure')">Not sure</button></div></div>
   <div class="qcard"><p class="qlabel"><span class="qtag ask">Ask Client</span></p><p class="qtext">"In the sun do you tan easily or burn?"</p><div class="qopts"><button class="qopt" onclick="sel(this,'sun','tan')">Tan easily</button><button class="qopt" onclick="sel(this,'sun','burn')">Burn easily</button><button class="qopt" onclick="sel(this,'sun','both')">Tan then burn</button><button class="qopt" onclick="sel(this,'sun','neither')">Rarely in sun</button></div></div>
   <div class="qcard"><p class="qlabel"><span class="qtag ask">Ask Client</span></p><p class="qtext">"Are your veins more blue/purple or green?"</p><div class="qopts"><button class="qopt" onclick="sel(this,'veins','blue')">Blue / Purple</button><button class="qopt" onclick="sel(this,'veins','green')">Green</button><button class="qopt" onclick="sel(this,'veins','both')">Mix of both</button></div></div>
@@ -210,15 +210,13 @@ textarea{width:100%;border:1px solid rgba(201,160,154,0.3);padding:0.8rem;font-s
   <div class="results" id="color-res">
     <div class="rhead"><p class="rhead-label">✦ Standard Color Analysis — The Vault Edit</p><h2 class="rhead-title">Color <em>Blueprint</em></h2><p class="rhead-name" id="cn-color-disp"></p></div>
     <div class="archetype"><div><div class="arch-label">✦ Style Archetype</div><div class="arch-name" id="arch-color">—</div></div><div style="font-size:0.6rem;color:rgba(255,255,255,0.5);text-align:right;">🖤 The Vault Edit · Standard</div></div>
-    <div class="pkg-note">✦ <strong>The Vault Edit — Standard</strong> includes: Full Neutral Palette · All 6 Signature Colors · Accent Colors · Accessory Color Guide · Pattern Guidance · Metal Tone · Colors to Avoid. Upgrade to The Full Reveal for seasonal guidance, makeup direction and hair recommendations.</div>
+    <div class="pkg-note">✦ <strong>The Vault Edit — Standard</strong> includes: 3 Power Neutrals · 5 Signature Colors · Accessory Color Guide · Metal Tone · Colors to Avoid. Upgrade to The Full Reveal for seasonal guidance, makeup direction and hair recommendations.</div>
     <div class="rcard"><p class="rcard-label">✦ Why This Is You</p><h3 class="rcard-title">Built From Your Actual Answers</h3><p style="font-size:0.8rem;color:var(--text-mid);line-height:1.9;font-weight:300;" id="color-narrative"></p></div>
     <div class="rcard"><p class="rcard-label">Color Type Identified</p><h3 class="rcard-title" id="undertone-r">—</h3><p style="font-size:0.75rem;color:var(--text-mid);line-height:1.8;font-weight:300;" id="undertone-d"></p><div class="ref-box"><div class="ref-label">✦ Reference Links</div><div class="ref-links" id="undertone-refs"></div></div></div>
-    <div class="rcard"><p class="rcard-label">Full Neutral Palette — Build Everything Around These</p><h3 class="rcard-title">Their Wardrobe Base</h3><div class="swatches" id="neutral-sw"></div><div class="ref-box"><div class="ref-label">✦ Neutral Outfit Inspo</div><div class="ref-links" id="neutral-refs"></div></div></div>
-    <div class="rcard"><p class="rcard-label">All 6 Signature Colors — What Makes Them Glow</p><h3 class="rcard-title">Their Complete Color Story</h3><div class="swatches" id="sig-sw"></div><div class="ref-box"><div class="ref-label">✦ Signature Color Inspo</div><div class="ref-links" id="sig-refs"></div></div></div>
-    <div class="rcard"><p class="rcard-label">Accent Colors — For Accessories & Pops of Color</p><h3 class="rcard-title">Their Finishing Touch</h3><div class="swatches" id="accent-sw"></div></div>
+    <div class="rcard"><p class="rcard-label">3 Power Neutrals — Build Everything Around These</p><h3 class="rcard-title">Their Wardrobe Base</h3><div class="swatches" id="neutral-sw"></div><div class="ref-box"><div class="ref-label">✦ Neutral Outfit Inspo</div><div class="ref-links" id="neutral-refs"></div></div></div>
+    <div class="rcard"><p class="rcard-label">5 Signature Colors — What Makes Them Glow</p><h3 class="rcard-title">Their Complete Color Story</h3><div class="swatches" id="sig-sw"></div><div class="ref-box"><div class="ref-label">✦ Signature Color Inspo</div><div class="ref-links" id="sig-refs"></div></div></div>
     <div class="rcard"><p class="rcard-label">Metal Tone</p><h3 class="rcard-title" id="metal-r">—</h3></div>
     <div class="rcard"><p class="rcard-label">Accessory Color Guide</p><h3 class="rcard-title">Bags, Shoes & Jewelry</h3><div class="gold-box"><p class="gold-label">Best Accessory Colors ✦</p><p class="gold-text" id="accessory-r"></p></div></div>
-    <div class="rcard"><p class="rcard-label">Pattern & Print Guidance</p><h3 class="rcard-title">How to Wear Prints</h3><ul class="rlist" id="pattern-r"></ul></div>
     <div class="rcard"><p class="rcard-label">Colors to Avoid</p><h3 class="rcard-title">Skip List</h3><div class="avoid-box"><p class="avoid-label">Minimize These</p><p class="avoid-text" id="avoid-r"></p></div></div>
   </div>
 
@@ -527,8 +525,7 @@ function genColor(){
   document.getElementById('accessory-r').textContent=d.accessory;
   document.getElementById('avoid-r').textContent=d.avoid;
   document.getElementById('arch-color').textContent=arch;
-  document.getElementById('pattern-r').innerHTML=d.patterns.map(p=>`<li class="ritem">${p}</li>`).join('');
-  renderSW('neutral-sw',d.neutrals,seasonKey);renderSW('sig-sw',d.signature,seasonKey);renderSW('accent-sw',d.accents,seasonKey);
+  renderSW('neutral-sw',d.neutrals.slice(0,3),seasonKey);renderSW('sig-sw',d.signature.slice(0,5),seasonKey);
   renderRefs('undertone-refs',d.uRefs);renderRefs('neutral-refs',d.nRefs);renderRefs('sig-refs',d.sRefs);
   document.getElementById('color-res').classList.add('vis');
   document.getElementById('color-res').scrollIntoView({behavior:'smooth'});
@@ -565,7 +562,7 @@ function genBody(){
 function copyColorHub(){
   const name=document.getElementById('cn-color').value||'Client';
   const{key:seasonKey,axes}=getSeason(CA);const d=colorData[seasonKey];const shape=BA.shape||'—';const family=SEASON_FAMILY[seasonKey];const arch=archetypesBySeasonFamily[family]?.[shape]||'That Girl';
-  const text=`STYLE ANALYSIS — ${name}\n\nStyle Archetype: ${arch}\nColor Type: ${d.label}\nMetal Tone: ${d.metal}\nPower Neutrals: ${d.neutrals.map(n=>n.n).join(', ')}\nSignature Colors: ${d.signature.map(s=>s.n).join(', ')}\nColors to Avoid: ${d.avoid}\n\n✦ Full analysis in your Style Guide`;
+  const text=`STYLE ANALYSIS — ${name}\n\nStyle Archetype: ${arch}\nColor Type: ${d.label}\nMetal Tone: ${d.metal}\nPower Neutrals: ${d.neutrals.map(n=>n.n).join(', ')}\nSignature Colors: ${d.signature.slice(0,5).map(s=>s.n).join(', ')}\nColors to Avoid: ${d.avoid}\n\n✦ Full analysis in your Style Guide`;
   navigator.clipboard.writeText(text).then(()=>alert('Copied for Style Hub! ✦'));
 }
 function copyColorGuide(){
@@ -573,7 +570,7 @@ function copyColorGuide(){
   const{key:seasonKey,axes}=getSeason(CA);const d=colorData[seasonKey];const shape=BA.shape||'—';const family=SEASON_FAMILY[seasonKey];const arch=archetypesBySeasonFamily[family]?.[shape]||'That Girl';
   const narrative=buildColorNarrative(CA,axes,d);
   const notes='';
-  const text=`═══════════════════════════════════\nHERSTYLEVAULT — COLOR ANALYSIS\n${name} · The Vault Edit (Standard)\n═══════════════════════════════════\n\n✦ STYLE ARCHETYPE: ${arch}\n\nCOLOR TYPE: ${d.label}\n${narrative}\n\nMETAL TONE: ${d.metal}\n\nFULL NEUTRAL PALETTE:\n${d.neutrals.map(n=>`• ${n.n}`).join('\n')}\n\nALL 6 SIGNATURE COLORS:\n${d.signature.map(s=>`• ${s.n}`).join('\n')}\n\nACCENT COLORS:\n${d.accents.map(a=>`• ${a.n}`).join('\n')}\n\nACCESSORY GUIDE:\n${d.accessory}\n\nPATTERN GUIDANCE:\n${d.patterns.map(p=>`• ${p}`).join('\n')}\n\nCOLORS TO AVOID:\n${d.avoid}${notes?'\n\nNOTES:\n'+notes:''}\n\n— Adebisi · HerStyleVault ✦`;
+  const text=`═══════════════════════════════════\nHERSTYLEVAULT — COLOR ANALYSIS\n${name} · The Vault Edit (Standard)\n═══════════════════════════════════\n\n✦ STYLE ARCHETYPE: ${arch}\n\nCOLOR TYPE: ${d.label}\n${narrative}\n\nMETAL TONE: ${d.metal}\n\nPOWER NEUTRALS:\n${d.neutrals.slice(0,3).map(n=>`• ${n.n}`).join('\n')}\n\nSIGNATURE COLORS:\n${d.signature.slice(0,5).map(s=>`• ${s.n}`).join('\n')}\n\nACCESSORY GUIDE:\n${d.accessory}\n\nCOLORS TO AVOID:\n${d.avoid}${notes?'\n\nNOTES:\n'+notes:''}\n\n— Adebisi · HerStyleVault ✦`;
   navigator.clipboard.writeText(text).then(()=>alert('Copied for Style Guide! ✦'));
 }
 function copyBodyHub(){
@@ -672,16 +669,14 @@ function buildPdfPages(){
     ${pdfFoot(PKG_NAME+' — Color Analysis')}
   `));
 
-  let paletteInner=`<p class="pdf-section-label" style="margin-top:0;">Power Neutrals</p>${pdfSwatches(d.neutrals,seasonKey)}<p class="pdf-section-label">Signature Colors</p>${pdfSwatches(d.signature,seasonKey)}`;
-  if(d.accents)paletteInner+=`<p class="pdf-section-label">Accent Colors</p>${pdfSwatches(d.accents,seasonKey)}`;
+  let paletteInner=`<p class="pdf-section-label" style="margin-top:0;">Power Neutrals</p>${pdfSwatches(d.neutrals.slice(0,3),seasonKey)}<p class="pdf-section-label">Signature Colors</p>${pdfSwatches(d.signature.slice(0,5),seasonKey)}`;
   paletteInner+=`<p class="pdf-section-label">Metal Tone</p><div class="pdf-box">${pdfEsc(d.metal)}</div>`;
   pages.push(pdfPage('',`<h1 class="pdf-h1">Their <em>Palette</em></h1>${paletteInner}${pdfFoot(PKG_NAME+' — Color Palette')}`));
 
   let patInner='';
   if(d.accessory)patInner+=`<p class="pdf-section-label" style="margin-top:0;">Accessory Color Guide</p><div class="pdf-box">${pdfEsc(d.accessory)}</div>`;
-  if(d.patterns)patInner+=`<p class="pdf-section-label">Pattern & Print Guidance</p>${pdfList(d.patterns)}`;
   patInner+=`<p class="pdf-section-label">Colors to Avoid</p><div class="pdf-box">${pdfEsc(d.avoid)}</div>`;
-  pages.push(pdfPage('',`<h1 class="pdf-h1">Pattern & <em>Avoid</em></h1>${patInner}${pdfFoot(PKG_NAME+' — Color Guidance')}`));
+  pages.push(pdfPage('',`<h1 class="pdf-h1">Accessories & <em>Avoid</em></h1>${patInner}${pdfFoot(PKG_NAME+' — Color Guidance')}`));
 
   if(d.seasonal){
     pages.push(pdfPage('',`<h1 class="pdf-h1">Seasonal & <em>Occasion</em> Color</h1>
