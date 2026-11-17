@@ -143,6 +143,7 @@ textarea{width:100%;border:1px solid rgba(201,160,154,0.3);padding:0.8rem;font-s
 .pdf-colorband h1{font-family:'Playfair Display',serif;font-size:1.7rem;color:#fff9f6;font-weight:400;margin:0;}
 .pdf-colorband h1 em{color:var(--gold);font-style:italic;}
 .pdf-shaperow{display:flex;align-items:center;gap:0.9rem;}
+.pdf-bodyrow{display:flex;gap:28px;align-items:flex-start;margin-bottom:0.4rem;}.pdf-croq{position:relative;width:200px;flex-shrink:0;}.pdf-croq img{width:200px;display:block;}.pdf-croq-lbl{position:absolute;right:0;transform:translateY(-120%);font-size:0.5rem;letter-spacing:0.16em;text-transform:uppercase;color:#8C7A5E;}.pdf-bodycol{flex:1;min-width:0;}
 .pdf-shaperow img{width:64px;height:64px;object-fit:contain;border-radius:10px;background:#fff;border:1px solid rgba(201,160,154,0.3);flex-shrink:0;}
 .pdf-log-meta{font-size:0.82rem;color:var(--text-light);margin:0 0 0.4rem;line-height:1.6;}
 .pdf-log-row{display:flex;gap:1.2rem;padding:0.55rem 0;border-bottom:1px solid rgba(201,160,154,0.25);}
@@ -401,7 +402,7 @@ function buildBodyNarrative(a,shapeData){
     out=`Shape comes from your overall proportions, not from which pieces fit off the rack or where weight lands first, since those vary a lot from person to person. Your shoulder-to-hip balance, waist definition and bust-to-hip proportion point to ${art} ${shapeName}, and that is what the recommendations below are built around.`;
   }
   out+=` You feel most confident in ${confText}, so every recommendation below is built to keep highlighting that.`;
-  const tip=proportionTipFor(key,a.height,a.proportion);if(tip){out+=` One more thing that's specific to you: ${tip}`;}
+  const tip=proportionTipFor(key,a.height,a.proportion);if(tip){out+=` One more thing that's specific to you: ${tip.charAt(0).toLowerCase()+tip.slice(1)}`;}
   return out;
 }
 function computeBodyShape(a){
@@ -643,8 +644,68 @@ function updateExportState(){
 /* ===== PDF Export Engine ===== */
 function pdfEsc(s){return(s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function pdfPage(cls,inner){return `<div class="pdf-page ${cls||''}">${inner}</div>`;}
+/* ===== Continuous-line body croquis (parametric, one drawing per computed shape) ===== */
+const CROQ_SHAPES={
+  hourglass:{s:21,b:19.5,w:12.5,h:21.5},
+  pear:{s:18.5,b:16.5,w:12.5,h:24},
+  apple:{s:20.5,b:20.5,w:19.5,h:19},
+  rectangle:{s:20.5,b:18,w:17,h:19.5},
+  inverted:{s:26,b:21.5,w:15,h:16.5}
+};
+const CROQ_Y={neck:36,sh:44.5,pit:62,bust:72,waist:98,hip:129,crotch:142,knee:184,ankle:238,toe:251};
+function croqCR(pts){
+  let d='M'+pts[0][0].toFixed(2)+' '+pts[0][1].toFixed(2);
+  for(let i=0;i<pts.length-1;i++){
+    const p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2;
+    const c1=[p1[0]+(p2[0]-p0[0])/6,p1[1]+(p2[1]-p0[1])/6],c2=[p2[0]-(p3[0]-p1[0])/6,p2[1]-(p3[1]-p1[1])/6];
+    d+=' C'+c1[0].toFixed(2)+' '+c1[1].toFixed(2)+' '+c2[0].toFixed(2)+' '+c2[1].toFixed(2)+' '+p2[0].toFixed(2)+' '+p2[1].toFixed(2);
+  }return d;
+}
+function croqRuns(P){
+  const {s,b,w,h}=P;
+  const A=Math.max(s,h*0.98+1);
+  const arm=[[45.6,31],[46.2,38],[50-s*0.62,42.6],[50-s,45],[50-s-1.2,56],[50-(A+1.6),78],[50-(A+2.6),98],[50-(A+3.4),116],[50-(A+4),130],[50-(A+4.3),139],[50-(A+3.4),146]];
+  const knee=10.2,ss=t=>t*t*(3-2*t);
+  const thigh=[139,150,161,172,184,196].map(y=>{const t=Math.min(1,Math.max(0,(y-129)/67));return [50-(knee+(h-knee)*(1-ss(t))),y];});
+  const torso=[[50-b+0.4,61],[50-b,72],[50-(b+w)/2-0.5,86],[50-w,98],[50-(w+h)/2-0.6,114],[50-h,129]].concat(thigh).concat([[50-9.1,208],[50-7.6,220],[50-6.2,230],[50-5.6,238]]);
+  const foot=[[50-5.6,238],[50-7.2,246],[50-13,251.5],[50-4.6,250.5],[50-3.2,238]];
+  const inner=[[50-3.2,238],[50-4,222],[50-4.8,204],[50-4,186],[50-3,166],[50-1.8,150],[50,141]];
+  return [arm,torso,foot,inner];
+}
+function croqMirror(run){return run.map(p=>[100-p[0],p[1]]).reverse();}
+function croqPath(P){
+  const L=croqRuns(P);const R=L.slice().reverse().map(croqMirror);
+  return L.concat(R).map(r=>croqCR(r)).map((d,i)=>i===0?d:d.replace(/^M/,'L')).join(' ');
+}
+// opt: stroke, sw, arrows (proportion guides), k (height scale), d (intensity -1..1)
+function croquisSVG(key,opt){
+  opt=opt||{};const P=Object.assign({},CROQ_SHAPES[key]||CROQ_SHAPES.hourglass);const k=opt.k||1,d=opt.d||0;
+  if(key==='hourglass'||key==='pear')P.w-=1.2*d; if(key==='apple')P.w+=1.2*d; if(key==='inverted')P.s+=1.5*d;
+  const stroke=opt.stroke||'#4B1515',sw=opt.sw||0.9;
+  const guides=opt.arrows?[[CROQ_Y.sh,P.s],[CROQ_Y.waist,P.w],[CROQ_Y.hip,P.h]].map(([y,hw])=>{
+    const x1=50-hw,x2=50+hw;
+    return `<line x1="3" x2="97" y1="${y}" y2="${y}" stroke="#CDBBA8" stroke-width=".4" stroke-dasharray="1.4 1.4"/><path d="M${x1+.8} ${y}H${x2-.8}M${x1+.8} ${y}l2.2-1.3M${x1+.8} ${y}l2.2 1.3M${x2-.8} ${y}l-2.2-1.3M${x2-.8} ${y}l-2.2 1.3" stroke="#8C7A5E" stroke-width=".7" fill="none" stroke-linecap="round"/>`;}).join(''):'';
+  const body=`<g transform="translate(50 256) scale(${k}) translate(-50 -256)"><ellipse cx="50" cy="17.5" rx="8.6" ry="11" fill="none" stroke="${stroke}" stroke-width="${sw}"/><path d="${croqPath(P)}" fill="none" stroke="${stroke}" stroke-width="${sw}" stroke-linejoin="round" stroke-linecap="round"/>${guides}</g>`;
+  return `<svg viewBox="0 -24 100 284" xmlns="http://www.w3.org/2000/svg">${body}</svg>`;
+}
+function croqOpts(BAx){const k={petite:0.92,tall:1.08}[BAx&&BAx.height]||1;const d={defined:1,soft:0,plain:-1}[BAx&&BAx.intensity];return{k,d:d===undefined?0:d};}
+function croqDataUri(shape,BAx,extra){return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(croquisSVG(shape,Object.assign({arrows:true},croqOpts(BAx),extra||{})));}
+// Percent positions (of the image height) for the three proportion labels, matching the drawing's height scale.
+
+const CROQ_CACHE={};
+function croqKey(shape,BAx){return shape+'|'+(BAx.height||'')+'|'+(BAx.intensity||'');}
+async function prepCroq(){const sh=BA.shape;if(!sh)return;try{CROQ_CACHE[croqKey(sh,BA)]=await croqPng(sh,BA,600,1704,'#4B1515',{arrows:true,sw:1.0});}catch(e){console.warn('croquis png failed',e);}}
+function croqImg(shape,BAx){return CROQ_CACHE[croqKey(shape,BAx)]||croqDataUri(shape,BAx);}
+function croqLabelPos(BAx){const k=croqOpts(BAx).k;const f=y=>((256+(y-256)*k)+24)/284*100;return{sh:f(CROQ_Y.sh),waist:f(CROQ_Y.waist),hip:f(CROQ_Y.hip)};}
+// PNG for the PowerPoint (transparent background, light line for the dark frame)
+function croqPng(shape,BAx,w,h,stroke,extra){
+  return new Promise((res,rej)=>{const svg=croquisSVG(shape,Object.assign({stroke:stroke||'#F4EFEA',sw:1.1},croqOpts(BAx),extra||{}));
+    const img=new Image();img.onload=()=>{const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');const r=Math.min(w/img.width,h/img.height);const iw=img.width*r,ih=img.height*r;x.drawImage(img,(w-iw)/2,(h-ih)/2,iw,ih);res(c.toDataURL('image/png'));};img.onerror=rej;
+    img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg.replace('<svg ','<svg width="1000" height="2840" '));});
+}
+
 function pdfFoot(label){return `<div class="pdf-foot"><span>HerStyleVault</span><span>${pdfEsc(label)}</span></div>`;}
-function pdfSwatches(arr,seasonKey){return `<div class="pdf-swatches">${arr.map(c=>`<div class="pdf-sw"><img class="pdf-sw-box" src="${(SWATCH_SHAPES[seasonKey]&&SWATCH_SHAPES[seasonKey][c.n])||''}"/><div class="pdf-sw-label">${pdfEsc(c.n)}</div></div>`).join('')}</div>`;}
+function pdfSwatches(arr,seasonKey){return `<div class="pdf-swatches">${arr.map(c=>`<div class="pdf-sw"><img class="pdf-sw-box" src="${(SWATCH_SHAPES[seasonKey]&&SWATCH_SHAPES[seasonKey][c.n])||''}"/><div class="pdf-sw-label">${pdfEsc(c.n)}</div><div class="pdf-sw-hex">${pdfEsc(String(c.h||'').toUpperCase())}</div></div>`).join('')}</div>`;}
 function pdfList(arr){return `<ul class="pdf-list">${arr.map(i=>`<li>${pdfEsc(i)}</li>`).join('')}</ul>`;}
 
 function buildPdfPages(){
@@ -690,12 +751,15 @@ function buildPdfPages(){
       ${pdfFoot(PKG_NAME+' — Exclusive Beauty Direction')}`));
   }
 
-  pages.push(pdfPage('',`<p class="pdf-section-label">✦ Body Shape</p><div class="pdf-shaperow"><img src="${SHAPE_ICON[shape]||''}"/><h1 class="pdf-h1" style="margin:0;">${pdfEsc(bic.label)}</h1></div>
+  {const CL=croqLabelPos(BA);
+  pages.push(pdfPage('',`<p class="pdf-section-label">✦ Body Shape</p>
+    <div class="pdf-bodyrow"><div class="pdf-croq"><img src="${croqImg(shape,BA)}"/><span class="pdf-croq-lbl" style="top:${CL.sh.toFixed(1)}%">Shoulders</span><span class="pdf-croq-lbl" style="top:${CL.waist.toFixed(1)}%">Waist</span><span class="pdf-croq-lbl" style="top:${CL.hip.toFixed(1)}%">Hips</span></div>
+    <div class="pdf-bodycol"><h1 class="pdf-h1" style="margin:0 0 0.7rem;">${pdfEsc(stripEmojiPrefix(bic.label))}</h1>
     <div class="pdf-box">${pdfEsc(bic.desc)}</div>
     <p class="pdf-section-label">✦ Why This Is You</p><div class="pdf-box">${pdfEsc(bodyNarrative)}</div>
-    <p class="pdf-section-label">Styling Goal</p><div class="pdf-box" style="font-style:italic;">${pdfEsc(bd.goal)}</div>
+    <p class="pdf-section-label">Styling Goal</p><div class="pdf-box" style="font-style:italic;">${pdfEsc(bd.goal)}</div></div></div>
     <p class="pdf-section-label">Pieces That Suit Your Shape</p>${pdfList(piecesSuitList(PIECES_SUIT[shape]))}
-    ${pdfFoot(PKG_NAME+' — Body Analysis')}`));
+    ${pdfFoot(PKG_NAME+' — Body Analysis')}`));}
 
 
   if(bd.occasion){
@@ -741,6 +805,7 @@ async function exportStyleGuidePDF(){
   btn.disabled=true;btn.textContent='Building your Style Analysis PDF…';
   const root=document.getElementById('pdf-root');
   try{
+    await prepCroq();
     const pagesHtml=buildPdfPages();
     root.innerHTML=pagesHtml.join('');
     await new Promise(r=>setTimeout(r,60));
@@ -947,8 +1012,8 @@ function buildColorTexts(d) {
   return {
     texts: [
       'STYLE ARCHETYPE', `${d.name}, you're a `, d.seasonLabel,
-      'POWER NEUTRALS', d.neutrals[0].name, d.neutrals[1].name, d.neutrals[2].name,
-      'SIGNATURE COLORS', d.signature[0].name, d.signature[1].name, d.signature[2].name,
+      'POWER NEUTRALS', hexLabel(d.neutrals[0]), hexLabel(d.neutrals[1]), hexLabel(d.neutrals[2]),
+      'SIGNATURE COLORS', hexLabel(d.signature[0]), hexLabel(d.signature[1]), hexLabel(d.signature[2]),
       'METAL TONE', metalLabel, capFirst(metalDescRaw),
       'COLORS TO AVOID', avBefore + ' ', capFirst(avAfter),
       'HERSTYLEVAULT', (PKG_NAME.toUpperCase()+' — COLOR ANALYSIS'),
@@ -1012,8 +1077,8 @@ function buildBodyTexts(d) {
 // ---------- Slide 4: Silhouette Guide ----------
 function itemRuns(str) {
   const [before, after] = dashSplit(str);
-  if (!after) return [titleCase(before), '']; // no " — " in source: title-only, no desc line
-  return [titleCase(before), capFirst(after)];
+  if (!after) return [capFirst(before), '']; // no " — " in source: title-only, no desc line
+  return [capFirst(before), capFirst(after)];
 }
 function buildSilhouetteTexts(d, pinterestUrl) {
   const sils = d.sils.map(itemRuns);
@@ -1104,8 +1169,8 @@ function gatherPptxData(){
   const d = colorData[seasonKey];
   const shape = BA.shape, intensity = BA.intensity;
   const bd = bodyData[shape];
-  const neutrals = d.neutrals.map(c => ({ name: c.n, img: (SWATCH_SHAPES[seasonKey] && SWATCH_SHAPES[seasonKey][c.n]) || null }));
-  const signature = d.signature.map(c => ({ name: c.n, img: (SWATCH_SHAPES[seasonKey] && SWATCH_SHAPES[seasonKey][c.n]) || null }));
+  const neutrals = d.neutrals.map(c => ({ name: c.n, h: c.h, img: (SWATCH_SHAPES[seasonKey] && SWATCH_SHAPES[seasonKey][c.n]) || null }));
+  const signature = d.signature.map(c => ({ name: c.n, h: c.h, img: (SWATCH_SHAPES[seasonKey] && SWATCH_SHAPES[seasonKey][c.n]) || null }));
   return {
     name, CA: { ...CA }, BA: { ...BA }, axes,
     seasonKey, seasonLabel: (d.label || d.undertone).replace(' ✦', ''), seasonDesc: d.desc,
@@ -1118,6 +1183,7 @@ function gatherPptxData(){
     goal: bd.goal,
     sils: bd.sils, necks: bd.necks || bd.tops, necksLabel: bd.necks ? 'BEST NECKLINES' : 'BEST TOPS', bots: bd.bots, avd: bd.avd,
     fabGood: bd.fabGood, fabAvoid: bd.fabAvoid,
+    colorNarrative: buildColorNarrative(CA, axes, d), bodyNarrative: buildBodyNarrative(BA, bd),
   };
 }
 
@@ -1131,6 +1197,35 @@ function replaceTextsByIndexPptx(xml, newTexts){
     i++;
     return open + xmlEscapePptx(replacement) + close;
   });
+}
+
+/* ----- PowerPoint helpers: hex labels, prose bubbles, croquis, template cleanup ----- */
+function hexLabel(c){return c.name+'§§'+String(c.h||'').toUpperCase();}
+const PPTX_RPR_FONTS='<a:latin typeface="Biome" panose="020B0503030204020804" pitchFamily="34" charset="0"/><a:ea typeface="Calibri" pitchFamily="34" charset="-122"/><a:cs typeface="Biome" panose="020B0503030204020804" pitchFamily="34" charset="0"/>';
+// "Name§§#HEX" -> name on one line, small hex code on the next, same text box
+function splitHexRuns(xml){
+  return xml.replace(/<a:r>((?:(?!<\/a:r>)[\s\S])*?)<a:t>([^<]*?)§§([^<]*)<\/a:t><\/a:r>/g,(m,rPr,name,hex)=>{
+    const small=rPr.replace(/\bsz="\d+"/,'sz="800"').replace(/\sb="1"/,'');
+    const hexRPr=/\bsz="/.test(small)?small:small.replace('<a:rPr','<a:rPr sz="800"');
+    return '<a:r>'+rPr+'<a:t>'+name+'</a:t></a:r><a:br>'+hexRPr+'</a:br><a:r>'+hexRPr+'<a:t>'+hex+'</a:t></a:r>';
+  });
+}
+function narrativeParas(text,sz){
+  const sents=String(text).match(/[^.!?]+[.!?]+(\s|$)/g)||[String(text)];
+  const total=sents.join('').length;let acc=0,cut=sents.length;
+  for(let i=0;i<sents.length;i++){acc+=sents[i].length;if(acc>=total*0.5){cut=i+1;break;}}
+  const chunks=[sents.slice(0,cut).join('').trim(),sents.slice(cut).join('').trim()].filter(Boolean);
+  return chunks.map((t,i)=>'<a:p><a:pPr marL="0" indent="0" algn="ctr"><a:lnSpc><a:spcPct val="125000"/></a:lnSpc>'+(i?'<a:spcBef><a:spcPts val="800"/></a:spcBef>':'')+'<a:buNone/></a:pPr><a:r><a:rPr lang="en-US" sz="'+sz+'" dirty="0"><a:solidFill><a:srgbClr val="4A2E2E"/></a:solidFill>'+PPTX_RPR_FONTS+'</a:rPr><a:t>'+xmlEscapePptx(t)+'</a:t></a:r></a:p>').join('');
+}
+// replace every paragraph of the named text shape with the given paragraph XML
+function setShapeParas(xml,shapeName,parasXml){
+  const i=xml.indexOf('name="'+shapeName+'"');if(i<0)return xml;
+  const sp0=xml.lastIndexOf('<p:sp>',i),sp1=xml.indexOf('</p:sp>',i)+7;
+  let sp=xml.slice(sp0,sp1);
+  const a=sp.indexOf('<a:lstStyle/>');if(a<0)return xml;
+  const b=sp.lastIndexOf('</p:txBody>');
+  sp=sp.slice(0,a+13)+parasXml+sp.slice(b);
+  return xml.slice(0,sp0)+sp+xml.slice(sp1);
 }
 
 async function exportStyleGuidePPTX(){
@@ -1156,6 +1251,8 @@ async function exportStyleGuidePPTX(){
       const { texts: colorTexts, metalLabelSz } = buildColorTexts(data);
       xml = replaceTextsByIndexPptx(xml, colorTexts);
       xml = xml.replace('sz="9999"', 'sz="' + metalLabelSz + '"');
+      xml = setShapeParas(xml, 'Text 5', narrativeParas(data.colorNarrative, 1150));
+      xml = splitHexRuns(xml);
       zip.file(f, xml);
       const imageMap = {
         'ppt/media/image2.png': data.neutrals[0].img, 'ppt/media/image3.png': data.neutrals[1].img, 'ppt/media/image4.png': data.neutrals[2].img,
@@ -1177,10 +1274,13 @@ async function exportStyleGuidePPTX(){
           xml = xml.replace(/<p:sp>[\s\S]*?<\/p:sp>/g, sp => sp.indexOf('>' + lbl + '<') !== -1 ? sp.replace(/sz="4400"/g, 'sz="' + sz + '"') : sp);
         }
       }
+      xml = setShapeParas(xml, 'Text 7', narrativeParas(data.bodyNarrative, 1150));
+      // the cartoon avatar becomes the continuous-line croquis, drawn light on the burgundy frame
+      xml = xml.replace('<a:srcRect l="28053" r="27854"/>', '')
+               .replace('<a:prstGeom prst="roundRect"><a:avLst><a:gd name="adj" fmla="val 50000"/></a:avLst></a:prstGeom><a:noFill/><a:ln><a:noFill/></a:ln><a:effectLst><a:reflection blurRad="12700" stA="38000" endPos="28000" dist="5000" dir="5400000" sy="-100000" algn="bl" rotWithShape="0"/></a:effectLst>', '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/><a:ln><a:noFill/></a:ln>');
       zip.file(f, xml);
-      const tone = (data.CA && data.CA.depth) || 'medium';
-      const figB64 = (BODY_FIGURES_B64[tone] && BODY_FIGURES_B64[tone][data.shape]) || null;
-      if(figB64) zip.file('ppt/media/image8.png', base64ToUint8Array(figB64));
+      const croq = await croqPng(data.shape, data.BA, 882, 2000, '#F4EFEA', {sw:1.3});
+      zip.file('ppt/media/image8.png', base64ToUint8Array(croq.split(',')[1]));
     }
     // slide 4: silhouette guide
     {
@@ -1208,7 +1308,17 @@ async function exportStyleGuidePPTX(){
       const f = 'ppt/slides/slide5.xml';
       let xml = await zip.file(f).async('string');
       xml = replaceTextsByIndexPptx(xml, buildFabricTexts(data));
+      // remove the 3D stiletto (3D model + its fallback picture); the page stays typographic
+      xml = xml.replace(/<mc:AlternateContent[^>]*>(?:(?!<\/mc:AlternateContent>)[\s\S])*?3D Model 28[\s\S]*?<\/mc:AlternateContent>/, '');
       zip.file(f, xml);
+      {
+        const rp = 'ppt/slides/_rels/slide5.xml.rels';
+        let rels = await zip.file(rp).async('string');
+        rels = rels.replace(/<Relationship [^>]*model3d1\.glb"\/>/, '').replace(/<Relationship [^>]*Target="\.\.\/media\/image11\.png"\/>/, '');
+        zip.file(rp, rels);
+        zip.remove('ppt/media/model3d1.glb');
+        zip.remove('ppt/media/image11.png');
+      }
     }
     // slide 6 (closing): reword the static text for the Style Analysis
     {
