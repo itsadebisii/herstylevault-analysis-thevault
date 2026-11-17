@@ -1083,10 +1083,17 @@ async function exportStyleGuidePPTX(){
       const pinterestUrl = 'https://www.pinterest.com/search/pins/?q=' + encodeURIComponent(shapeDisplayName + ' shape flattering outfits');
       const { texts } = buildSilhouetteTexts(data, pinterestUrl);
       xml = replaceTextsByIndexPptx(xml, texts);
+      // two heart links: the left heart goes with Best Bottoms, the right heart with Best Necklines / Best Tops.
+      // The template points both at one relationship, so give the right heart its own.
+      const leftHeartUrl = 'https://www.pinterest.com/search/pins/?q=' + encodeURIComponent(shapeDisplayName + ' shape flattering pants and skirts outfits');
+      const rightHeartUrl = 'https://www.pinterest.com/search/pins/?q=' + encodeURIComponent(shapeDisplayName + ' shape ' + ((data.necksLabel === 'BEST TOPS') ? 'flattering tops' : 'best necklines') + ' outfits');
+      let heartHits = 0;
+      xml = xml.replace(/(<a:hlinkClick[^>]*r:id=")rId5(")/g, (m, a, b) => (++heartHits > 2) ? a + 'rIdHeart2' + b : m);
       zip.file(f, xml);
       const relsPath = 'ppt/slides/_rels/slide4.xml.rels';
       let rels = await zip.file(relsPath).async('string');
-      rels = rels.replace(/Target="https:\/\/www\.pinterest\.com\/search\/pins\/\?q=[^"]*"/, 'Target="' + pinterestUrl + '"');
+      rels = rels.replace(/Target="https:\/\/www\.pinterest\.com\/search\/pins\/\?q=[^"]*"/, 'Target="' + leftHeartUrl + '"');
+      rels = rels.replace('</Relationships>', '<Relationship Id="rIdHeart2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="' + rightHeartUrl + '" TargetMode="External"/></Relationships>');
       zip.file(relsPath, rels);
     }
     // slide 5: fabric & avoid list
