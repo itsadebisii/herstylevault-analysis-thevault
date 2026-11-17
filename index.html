@@ -991,6 +991,22 @@ function base64ToUint8Array(b64){
   return arr;
 }
 
+function padSwatchForPptx(dataUri, aspect){
+  return new Promise(res=>{
+    const im=new Image();
+    im.onload=()=>{
+      const H=300, W=Math.round(H*aspect);
+      const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+      // arch sits low and narrow inside the frame so the label above it and the bubble edge below both have clear space
+      const ah=Math.round(H*0.72), aw=Math.round(ah*0.91*(aspect<1?1:1));
+      const ax=Math.round((W-aw)/2), ay=Math.round(H*0.21);
+      x.drawImage(im,ax,ay,aw,ah);
+      res(c.toDataURL('image/png'));
+    };
+    im.onerror=()=>res(dataUri);
+    im.src=dataUri;
+  });
+}
 function gatherPptxData(){
   const name = (document.getElementById('cn-color').value || document.getElementById('cn-body').value || 'Client').trim() || 'Client';
   const { key: seasonKey, axes } = getSeason(CA);
@@ -1055,7 +1071,7 @@ async function exportStyleGuidePPTX(){
         'ppt/media/image5.png': data.signature[0].img, 'ppt/media/image6.png': data.signature[1].img, 'ppt/media/image7.png': data.signature[2].img,
       };
       for(const [p, dataUri] of Object.entries(imageMap)){
-        if(dataUri) zip.file(p, base64ToUint8Array(dataUri.split(',')[1]));
+        if(dataUri){ const padded = await padSwatchForPptx(dataUri, p.endsWith('image6.png') ? 0.92 : 1); zip.file(p, base64ToUint8Array(padded.split(',')[1])); }
       }
     }
     // slide 3: body analysis
