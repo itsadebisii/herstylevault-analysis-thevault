@@ -214,8 +214,8 @@ textarea{width:100%;border:1px solid rgba(201,160,154,0.3);padding:0.8rem;font-s
     <div class="pkg-note">✦ <strong>The Vault Edit — Standard</strong> includes: 3 Power Neutrals · 5 Signature Colors · Accessory Color Guide · Metal Tone · Colors to Avoid. Upgrade to The Full Reveal for seasonal guidance, makeup direction and hair recommendations.</div>
     <div class="rcard"><p class="rcard-label">✦ Why This Is You</p><h3 class="rcard-title">Built From Your Actual Answers</h3><p style="font-size:0.8rem;color:var(--text-mid);line-height:1.9;font-weight:300;" id="color-narrative"></p></div>
     <div class="rcard"><p class="rcard-label">Color Type Identified</p><h3 class="rcard-title" id="undertone-r">—</h3><p style="font-size:0.75rem;color:var(--text-mid);line-height:1.8;font-weight:300;" id="undertone-d"></p><div class="ref-box"><div class="ref-label">✦ Reference Links</div><div class="ref-links" id="undertone-refs"></div></div></div>
-    <div class="rcard"><p class="rcard-label">3 Power Neutrals — Build Everything Around These</p><h3 class="rcard-title">Their Wardrobe Base</h3><div class="swatches" id="neutral-sw"></div><div class="ref-box"><div class="ref-label">✦ Neutral Outfit Inspo</div><div class="ref-links" id="neutral-refs"></div></div></div>
-    <div class="rcard"><p class="rcard-label">5 Signature Colors — What Makes Them Glow</p><h3 class="rcard-title">Their Complete Color Story</h3><div class="swatches" id="sig-sw"></div><div class="ref-box"><div class="ref-label">✦ Signature Color Inspo</div><div class="ref-links" id="sig-refs"></div></div></div>
+    <div class="rcard"><p class="rcard-label">3 Power Neutrals — Build Everything Around These</p><h3 class="rcard-title">Your Wardrobe Base</h3><div class="swatches" id="neutral-sw"></div><div class="ref-box"><div class="ref-label">✦ Neutral Outfit Inspo</div><div class="ref-links" id="neutral-refs"></div></div></div>
+    <div class="rcard"><p class="rcard-label">5 Signature Colors — What Makes You Glow</p><h3 class="rcard-title">Your Complete Color Story</h3><div class="swatches" id="sig-sw"></div><div class="ref-box"><div class="ref-label">✦ Signature Color Inspo</div><div class="ref-links" id="sig-refs"></div></div></div>
     <div class="rcard"><p class="rcard-label">Metal Tone</p><h3 class="rcard-title" id="metal-r">—</h3></div>
     <div class="rcard"><p class="rcard-label">Accessory Color Guide</p><h3 class="rcard-title">Bags, Shoes & Jewelry</h3><div class="gold-box"><p class="gold-label">Best Accessory Colors ✦</p><p class="gold-text" id="accessory-r"></p></div></div>
     <div class="rcard"><p class="rcard-label">Colors to Avoid</p><h3 class="rcard-title">Skip List</h3><div class="avoid-box"><p class="avoid-label">Minimize These</p><p class="avoid-text" id="avoid-r"></p></div></div>
@@ -733,7 +733,7 @@ function buildPdfPages(){
 
   let paletteInner=`<p class="pdf-section-label" style="margin-top:0;">Power Neutrals</p>${pdfSwatches(d.neutrals.slice(0,3),seasonKey)}<p class="pdf-section-label">Signature Colors</p>${pdfSwatches(d.signature.slice(0,5),seasonKey)}`;
   paletteInner+=`<p class="pdf-section-label">Metal Tone</p><div class="pdf-box">${pdfEsc(d.metal)}</div>`;
-  pages.push(pdfPage('',`<h1 class="pdf-h1">Their <em>Palette</em></h1>${paletteInner}${pdfFoot(PKG_NAME+' — Color Palette')}`));
+  pages.push(pdfPage('',`<h1 class="pdf-h1">Your <em>Palette</em></h1>${paletteInner}${pdfFoot(PKG_NAME+' — Color Palette')}`));
 
   let patInner='';
   if(d.accessory)patInner+=`<p class="pdf-section-label" style="margin-top:0;">Accessory Color Guide</p><div class="pdf-box">${pdfEsc(d.accessory)}</div>`;
