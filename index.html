@@ -167,6 +167,27 @@ textarea{width:100%;border:1px solid rgba(201,160,154,0.3);padding:0.8rem;font-s
 .pdf-fnum{display:block;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.58rem;letter-spacing:0.18em;color:#6B6862;margin-bottom:0.5rem;font-weight:500;}
 .pdf-rulebox{margin-top:1.4rem;background:#EFECE6;border-left:3px solid #7A1321;padding:1.1rem 1.4rem;}
 .pdf-rulebox p:last-child{font-family:'Cormorant Garamond',serif;font-size:1.35rem;line-height:1.45;color:#181716;margin:0;}
+.snap-card{width:1080px;height:1350px;background:#FAF9F6;padding:80px 84px;box-sizing:border-box;font-family:'Plus Jakarta Sans',sans-serif;color:#181716;position:relative;overflow:hidden;border:0;}
+.snap-top{display:flex;justify-content:space-between;align-items:center;font-size:20px;letter-spacing:0.22em;text-transform:uppercase;color:#6B6862;font-weight:500;margin-bottom:40px;}
+.snap-brand{font-family:'Cormorant Garamond',serif;font-size:36px;letter-spacing:0.02em;text-transform:none;color:#181716;font-weight:500;}
+.snap-label{font-size:18px;letter-spacing:0.22em;text-transform:uppercase;color:#6B6862;font-weight:500;margin:0 0 14px;}
+.snap-persona{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:92px;line-height:1;color:#181716;margin:0 0 18px;}
+.snap-tag{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:33px;line-height:1.3;color:#7A1321;margin:0 0 34px;max-width:900px;}
+.snap-trio{display:flex;gap:0;border:1px solid #DCD8D0;margin-bottom:34px;}
+.snap-trio>div{flex:1;background:#EFECE6;padding:20px 24px;}
+.snap-trio>div+div{border-left:1px solid #DCD8D0;}
+.snap-trio b{display:block;font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:500;line-height:1.1;}
+.snap-sw{display:flex;gap:30px;margin-bottom:34px;}
+.snap-sw>div{display:flex;flex-direction:column;align-items:center;width:128px;}
+.snap-sw img{width:96px;height:96px;object-fit:contain;margin-bottom:8px;}
+.snap-sw span{font-size:18px;color:#3F3C38;text-align:center;line-height:1.25;font-weight:500;}
+.snap-sw em{font-style:normal;font-size:15px;color:#6B6862;letter-spacing:0.04em;margin-top:3px;}
+.snap-sep{width:24px;}
+.snap-formula{display:flex;gap:14px;align-items:stretch;margin-bottom:20px;}
+.snap-formula>div{flex:1;background:#EFECE6;border:1px solid #DCD8D0;padding:18px 20px;font-family:'Cormorant Garamond',serif;font-size:29px;line-height:1.2;font-weight:500;}
+.snap-formula i{display:block;font-style:normal;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;letter-spacing:0.18em;color:#6B6862;margin-bottom:10px;font-weight:500;}
+.snap-plus{align-self:center;font-family:'Cormorant Garamond',serif;font-size:44px;color:#7A1321;flex:0 0 auto !important;background:none !important;border:0 !important;padding:0 !important;}
+.snap-foot{position:absolute;left:84px;right:84px;bottom:52px;display:flex;justify-content:space-between;font-size:17px;letter-spacing:0.14em;text-transform:uppercase;color:#6B6862;border-top:1px solid #DCD8D0;padding-top:18px;}
 
 .qanchor{display:flex;gap:1rem;flex-wrap:wrap;align-items:center;margin-top:0.7rem;padding-top:0.6rem;border-top:1px solid rgba(201,160,154,0.15);}
 .qanchor-item{display:flex;align-items:center;gap:0.4rem;}
@@ -287,6 +308,7 @@ textarea{width:100%;border:1px solid rgba(201,160,154,0.3);padding:0.8rem;font-s
     <button class="export-btn" id="exportPdfBtn" onclick="exportStyleGuidePDF()" disabled>⤓ Download Style Analysis (PDF)</button>
     <button class="export-btn" id="exportPptxBtn" onclick="exportStyleGuidePPTX()" disabled style="margin-top:0.6rem;">⤓ Download Style Analysis (PowerPoint)</button>
     <button class="export-btn" id="exportLogBtn" onclick="exportAnswerLogPDF()" disabled style="margin-top:0.6rem;">⤓ Download Answer Log (PDF) · for your records</button>
+    <button class="export-btn" id="exportSnapBtn" onclick="exportSnapshotPNG()" disabled style="margin-top:0.6rem;">Download Style Snapshot (image for the Style Hub)</button>
   </div>
   <div id="outfit-slots"></div>
 </div>
@@ -640,7 +662,7 @@ function updateExportState(){
   const pptxBtn=document.getElementById('exportPptxBtn');const logBtn=document.getElementById('exportLogBtn');
   if(!btn)return;
   if(colorGenerated&&bodyGenerated){
-    btn.disabled=false;if(pptxBtn)pptxBtn.disabled=false;if(logBtn)logBtn.disabled=false;
+    btn.disabled=false;if(pptxBtn)pptxBtn.disabled=false;if(logBtn)logBtn.disabled=false;{const sb=document.getElementById('exportSnapBtn');if(sb)sb.disabled=false;}
     if(tag)tag.textContent='Step 2 of 2 · Complete';
     const{key:seasonKey}=getSeason(CA);
     const seasonLabel=colorData[seasonKey].label;
@@ -925,6 +947,35 @@ async function exportStyleGuidePDF(){
     btn.disabled=false;btn.textContent=origLabel;
     updateExportState();
   }
+}
+
+
+async function exportSnapshotPNG(){
+  if(!colorGenerated||!bodyGenerated){updateExportState();return;}
+  const btn=document.getElementById('exportSnapBtn');const orig=btn.textContent;btn.disabled=true;btn.textContent='Building your Style Snapshot…';
+  const root=document.getElementById('pdf-root');
+  try{
+    const name=(document.getElementById('cn-color').value||document.getElementById('cn-body').value||'Client').trim()||'Client';
+    const{key:seasonKey}=getSeason(CA);const d=colorData[seasonKey];const shape=BA.shape;
+    const shapeName=String(bodyData[shape].shape||'').replace(/^[^A-Za-z]+/,'').replace(/\s*Shape$/,'');
+    const season=String(d.label||d.undertone);
+    const pr=personaAnswered()?computePersona(BA):null;
+    const sw=arr=>arr.map(c=>'<div><img src="'+((SWATCH_SHAPES[seasonKey]&&SWATCH_SHAPES[seasonKey][c.n])||'')+'"/><span>'+pdfEsc(c.n)+'</span><em>'+pdfEsc(String(c.h||'').toUpperCase())+'</em></div>').join('');
+    const [metal]=String(d.metal).split(' — ');
+    const html='<div class="snap-card"><div class="snap-top"><span class="snap-brand">HerStyleVault</span><span>Your Style Snapshot</span></div>'
+      +(pr?'<p class="snap-label">Your Style Persona</p><div class="snap-persona">'+pdfEsc(pr.name)+'</div><p class="snap-tag">'+pdfEsc(pr.tagline)+'</p>':'<p class="snap-label">Prepared for</p><div class="snap-persona">'+pdfEsc(name)+'</div><p class="snap-tag"></p>')
+      +'<div class="snap-trio"><div><p class="snap-label">Color Type</p><b>'+pdfEsc(season)+'</b></div><div><p class="snap-label">Body Shape</p><b>'+pdfEsc(shapeName)+'</b></div><div><p class="snap-label">Metal Tone</p><b>'+pdfEsc(metal)+'</b></div></div>'
+      +'<p class="snap-label">Your Palette</p><div class="snap-sw">'+sw(d.neutrals.slice(0,3))+'<div class="snap-sep"></div>'+sw(d.signature.slice(0,3))+'</div>'
+      +(pr?'<p class="snap-label">Your 3-Piece Signature Formula</p><div class="snap-formula">'+pr.formula.map((f,i)=>(i?'<div class="snap-plus">+</div>':'')+'<div><i>0'+(i+1)+'</i>'+pdfEsc(f)+'</div>').join('')+'</div>':'')
+      +'<div class="snap-foot"><span>Prepared for '+pdfEsc(name)+'</span><span>Full Style Analysis arrives in your Style Guide</span></div></div>';
+    root.innerHTML=html;await new Promise(r=>setTimeout(r,80));
+    if(document.fonts&&document.fonts.ready)await document.fonts.ready;
+    const canvas=await html2canvas(root.firstElementChild,{scale:1,backgroundColor:'#FAF9F6',useCORS:true});
+    const blob=await new Promise(r=>canvas.toBlob(r,'image/png'));
+    const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;
+    a.download=name.replace(/[\\/:*?"<>|]/g,'').trim()+' - Style Snapshot.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);
+  }catch(err){console.error(err);alert('Something went wrong building the Style Snapshot. Please try again.');}
+  finally{root.innerHTML='';btn.disabled=false;btn.textContent=orig;updateExportState();}
 }
 
 function initStepper(section){
