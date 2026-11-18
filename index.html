@@ -54,6 +54,7 @@ textarea{width:100%;border:1px solid rgba(201,160,154,0.3);padding:0.8rem;font-s
 .stepprogress .stepline{flex:1;height:2px;background:rgba(201,160,154,0.25);min-width:8px;}
 .stepprogress .stepline.done{background:var(--pkg);}
 .stepnav-btns{display:flex;justify-content:space-between;align-items:center;gap:1rem;}
+.stepnav-bottom{margin:1.4rem 0 1.6rem;}
 .stepback{background:none;border:none;font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-light);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;}
 .stepback:disabled{opacity:0.3;cursor:not-allowed;}
 .stepnext{padding:0.85rem 2rem;background:var(--pkg);color:white;border:none;font-size:0.7rem;letter-spacing:0.16em;text-transform:uppercase;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;}
@@ -999,6 +1000,11 @@ function initStepper(section){
   const nav=document.createElement('div');
   nav.className='stepnav';
   sec.insertBefore(nav,cards[0]);
+  // Back / Next sit at the BOTTOM of the questions (progress dots stay on top)
+  const navBtns=document.createElement('div');
+  navBtns.className='stepnav-btns stepnav-bottom';
+  const lastCard=cards[cards.length-1];
+  lastCard.parentNode.insertBefore(navBtns,lastCard.nextSibling);
   function keyFor(card){
     const opt=card.querySelector('.qopt[onclick]');
     if(!opt)return null;
@@ -1020,13 +1026,11 @@ function initStepper(section){
       if(i<total-1)dots+=`<span class="stepline ${i<idx?'done':''}"></span>`;
     }
     const isLast=idx===total-1;
-    nav.innerHTML=`<div class="stepprogress">${dots}</div>
-      <div class="stepnav-btns">
-        <button class="stepback" ${idx===0?'disabled':''}>← Back</button>
-        <button class="stepnext" ${!groupAnswered(groups[idx])?'disabled':''}>${isLast?'Generate Analysis':'Next'}</button>
-      </div>`;
-    nav.querySelector('.stepback').onclick=()=>{if(idx>0){idx--;showGroup();}};
-    nav.querySelector('.stepnext').onclick=()=>{
+    nav.innerHTML=`<div class="stepprogress">${dots}</div>`;
+    navBtns.innerHTML=`<button class="stepback" ${idx===0?'disabled':''}>← Back</button>
+        <button class="stepnext" ${!groupAnswered(groups[idx])?'disabled':''}>${isLast?'Generate Analysis':'Next'}</button>`;
+    navBtns.querySelector('.stepback').onclick=()=>{if(idx>0){idx--;showGroup();}};
+    navBtns.querySelector('.stepnext').onclick=()=>{
       if(idx<total-1){idx++;showGroup();}
       else{section==='color'?genColor():genBody();}
     };
